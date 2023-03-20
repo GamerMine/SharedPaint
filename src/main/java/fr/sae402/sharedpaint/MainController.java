@@ -1,5 +1,6 @@
 package fr.sae402.sharedpaint;
 
+import fr.sae402.sharedpaint.metier.Cercle;
 import fr.sae402.sharedpaint.metier.Client;
 import fr.sae402.sharedpaint.metier.OutilForme;
 import fr.sae402.sharedpaint.metier.Rectangle;
@@ -43,7 +44,10 @@ public class MainController {
             shapeTools.getChildren().add(toggleButton);
         }
 
+
         this.currentClient.write(new Rectangle(0, 0, "#FFFFFF", true, 20, 20));
+        this.currentClient.write(new Cercle(1, 1, "#FFFFFF", false, 5));
+        this.currentClient.write(new Rectangle(20, 100, "#FFCCFF", false, 30, 30));
 
         this.currentClient.close();
     }
