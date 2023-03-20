@@ -3,21 +3,36 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sae402.sharedpaint.MainController">
-   <left>
-      <VBox prefWidth="28.0" BorderPane.alignment="CENTER">
-         <children>
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-              <content>
-                <AnchorPane fx:id="shapeTools" minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
-              </content>
-            </ScrollPane>
-         </children>
-      </VBox>
-   </left>
    <right>
       <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER" />
    </right>
+   <left>
+      <GridPane BorderPane.alignment="CENTER">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints maxHeight="233.0" minHeight="10.0" prefHeight="147.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="289.0" minHeight="10.0" prefHeight="253.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <ScrollPane fitToWidth="true" prefHeight="122.0" prefWidth="102.0">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <FlowPane fx:id="shapeTools" prefWidth="102.0" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </ScrollPane>
+         </children>
+      </GridPane>
+   </left>
 </BorderPane>
