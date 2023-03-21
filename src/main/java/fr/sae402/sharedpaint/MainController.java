@@ -1,9 +1,6 @@
 package fr.sae402.sharedpaint;
 
-import fr.sae402.sharedpaint.metier.Cercle;
-import fr.sae402.sharedpaint.metier.Client;
-import fr.sae402.sharedpaint.metier.OutilForme;
-import fr.sae402.sharedpaint.metier.Rectangle;
+import fr.sae402.sharedpaint.metier.*;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -22,13 +19,16 @@ public class MainController {
     private final int ICON_SIZE = 32;
     private Client currentClient;
 
+    private Metier metier;
+
     @FXML
     private FlowPane shapeTools;
 
     @FXML
     public void initialize() {
-        this.toolToggleGroup = new ToggleGroup();
-        this.currentClient = new Client();
+        this.metier             = new Metier(this);
+        this.toolToggleGroup    = new ToggleGroup();
+        this.currentClient      = new Client();
         for (OutilForme outil : OutilForme.getOutils()) {
             ToggleButton toggleButton = new ToggleButton("");
             ImageView imageView = new ImageView(new Image(outil.getIcon()));
@@ -45,10 +45,30 @@ public class MainController {
         }
 
 
+
         this.currentClient.write(new Rectangle(0, 0, "#FFFFFF", true, 20, 20));
         this.currentClient.write(new Cercle(1, 1, "#FFFFFF", false, 5));
         this.currentClient.write(new Rectangle(20, 100, "#FFCCFF", false, 30, 30));
 
         this.currentClient.close();
+    }
+
+    public void dessiner() {
+        this.metier.dessiner();
+    }
+
+    public void changerCouleur() {
+        this.metier.changerCouleur();
+    }
+
+    public void changerForme() {
+        this.metier.changerForme();
+    }
+    public void chargerJSON() {
+        this.metier.chargerJSON();
+    }
+
+    public void ecrireJSON() {
+        this.metier.ecrireJSON();
     }
 }

@@ -1,10 +1,16 @@
 package fr.sae402.sharedpaint.metier;
 
+import fr.sae402.sharedpaint.MainController;
 import javafx.scene.paint.Color;
 
 public class Metier {
 
+    private MainController controller;
     private Color couleurActuel;
+    public Metier(MainController controller )
+    {
+        this.controller = controller;
+    }
 
     public void dessiner() {
 
