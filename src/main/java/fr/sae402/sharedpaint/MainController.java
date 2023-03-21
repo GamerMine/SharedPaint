@@ -1,16 +1,20 @@
 package fr.sae402.sharedpaint;
 
+import fr.sae402.sharedpaint.metier.Cercle;
+import fr.sae402.sharedpaint.metier.Metier;
+import fr.sae402.sharedpaint.metier.OutilForme;
+import fr.sae402.sharedpaint.metier.Rectangle;
+import fr.sae402.sharedpaint.networking.Client;
+import fr.sae402.sharedpaint.networking.Serveur;
 import fr.sae402.sharedpaint.metier.*;
 import fr.sae402.sharedpaint.ui.CercleUI;
 import fr.sae402.sharedpaint.ui.LigneUI;
 import fr.sae402.sharedpaint.ui.RectangleUI;
 import fr.sae402.sharedpaint.ui.TexteUI;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
@@ -18,9 +22,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-
 import java.util.ArrayList;
 
 public class MainController {
@@ -41,7 +42,7 @@ public class MainController {
     public void initialize() {
         this.metier             = new Metier(this);
         this.toolToggleGroup    = new ToggleGroup();
-        this.currentClient      = new Client();
+        this.currentClient      = new Client("LOLILOL");
         for (OutilForme outil : OutilForme.getOutils()) {
             ToggleButton toggleButton = new ToggleButton("");
             ImageView imageView = new ImageView(new Image(outil.getIcon()));
@@ -110,11 +111,8 @@ public class MainController {
 
         shapeTools.getChildren().add(colPick);
 
-        this.currentClient.write(new Rectangle(0, 0, "#FFFFFF", true, 20, 20));
-        this.currentClient.write(new Cercle(1, 1, "#FFFFFF", false, 5));
-        this.currentClient.write(new Rectangle(20, 100, "#FFCCFF", false, 30, 30));
-
-        this.currentClient.close();
+        new Thread(new Serveur()).start();
+        new Thread(new Client("LOLILOL")).start();
     }
 
     public void dessiner(MouseEvent e) {
