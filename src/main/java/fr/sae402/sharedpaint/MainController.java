@@ -1,11 +1,21 @@
 package fr.sae402.sharedpaint;
 
 import fr.sae402.sharedpaint.metier.*;
+import fr.sae402.sharedpaint.ui.CercleUI;
+import fr.sae402.sharedpaint.ui.LigneUI;
+import fr.sae402.sharedpaint.ui.RectangleUI;
+import fr.sae402.sharedpaint.ui.TexteUI;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
@@ -24,6 +34,8 @@ public class MainController {
 
     @FXML
     private FlowPane shapeTools;
+    @FXML
+    private AnchorPane paneDessin;
 
     @FXML
     public void initialize() {
@@ -105,10 +117,38 @@ public class MainController {
         this.currentClient.close();
     }
 
-    public void dessiner() {
-        this.metier.dessiner();
-    }
+    public void dessiner(MouseEvent e) {
+        System.out.println("DESSINER"); //ACCES
+        int posX = 0;
+        int posY = 0;
+        if(e.getSource() == MouseEvent.MOUSE_PRESSED) {
+            System.out.println("BOUTON PRESS"); //PAS ACCES
+            posX = (int) e.getX();
+            posY = (int) e.getY();
+        }
+        if(e.getSource() == MouseEvent.MOUSE_RELEASED) {
+            Node node = null;
+            System.out.println("BOUTON RELACHE"); // PAS ACCES
+            if(this.metier.getFormeActuel() instanceof Rectangle) {
+                node = new RectangleUI(posX, posY, this.metier.getCouleurActuel().toString(),  this.metier.isRempli(), (int) (e.getX()-posX), (int) (e.getY()-posY));
+            }
+            if(this.metier.getFormeActuel() instanceof Cercle) {
+                //Calcul du Rayon
+                double distanceX = e.getX()-posX;
+                double distanceY = e.getY()-posY;
+                double rayon = Math.sqrt(Math.pow(distanceX,2)+Math.pow(distanceY,2));
 
+                node = new CercleUI(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) rayon);
+            }
+            if(this.metier.getFormeActuel() instanceof Ligne) {
+                node = new LigneUI(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) e.getX(), (int) e.getY());
+            }
+            if(this.metier.getFormeActuel() instanceof Texte) {
+                node = new TexteUI(posX, posY, this.metier.getCouleurActuel().toString(), "TEXTE A EDIT");
+            }
+            this.paneDessin.getChildren().add(node);
+        }
+    }
     public void changerCouleur() {
         this.metier.changerCouleur();
     }
