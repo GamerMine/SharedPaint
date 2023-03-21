@@ -35,4 +35,7 @@
          </children>
       </GridPane>
    </left>
+   <center>
+      <AnchorPane fx:id="paneDessin" onMousePressed="#dessiner" onMouseReleased="#dessiner" BorderPane.alignment="CENTER" />
+   </center>
 </BorderPane>
