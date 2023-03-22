@@ -18,7 +18,7 @@ public class Client implements Runnable {
     private String pseudo;
     private Gson gsonBuilder;
     private JsonArray historique;
-    private FileWriter file;
+    private boolean stop;
 
     private DatagramSocket ds;
 
@@ -28,11 +28,11 @@ public class Client implements Runnable {
         this.gsonBuilder = new GsonBuilder().setPrettyPrinting().create();
         this.historique = new JsonArray();
         try {
-            this.file = new FileWriter(this.idClient+".json");
             this.ds = new DatagramSocket();
-        } catch (IOException e) {
+        } catch (SocketException e) {
             throw new RuntimeException(e);
         }
+        this.stop = false;
     }
 
     public String getPseudo() {
@@ -54,8 +54,18 @@ public class Client implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        while (true) {
-
+        while (!stop) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
+        System.out.println("Client connection lost");
+    }
+
+    public void stop() {
+        ds.close();
+        this.stop = true;
     }
 }

@@ -21,6 +21,7 @@ public class Serveur implements Runnable {
 
     private DatagramSocket ds;
     private HashMap<UUID, InetAddress> clients;
+    private boolean stop;
 
     public Serveur() {
         try {
@@ -29,6 +30,7 @@ public class Serveur implements Runnable {
             throw new RuntimeException(e);
         }
         this.clients = new HashMap<>();
+        this.stop = false;
     }
 
     private void traiter(DatagramPacket data) throws IOException, ClassNotFoundException {
@@ -54,13 +56,18 @@ public class Serveur implements Runnable {
     @Override
     public void run() {
         DatagramPacket data = new DatagramPacket(buffer, TAILLE_BUFFER);
-        while (true) {
+        while (!stop) {
             try {
                 ds.receive(data);
                 traiter(data);
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
+            } catch (IOException | ClassNotFoundException ignored) {
             }
         }
+        System.out.println("Server closed");
+    }
+
+    public void stop() {
+        ds.close();
+        this.stop = true;
     }
 }

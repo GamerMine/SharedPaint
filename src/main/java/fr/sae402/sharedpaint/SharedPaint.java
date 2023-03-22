@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 
@@ -15,7 +16,12 @@ public class SharedPaint extends Application {
         stage.setTitle("SharedPaint");
         stage.setScene(scene);
         stage.setMaximized(true);
+        stage.setOnCloseRequest(this::onStageClose);
         stage.show();
+    }
+
+    private void onStageClose(WindowEvent e) {
+
     }
 
     public static void main(String[] args) {

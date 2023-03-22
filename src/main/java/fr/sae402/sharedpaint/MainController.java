@@ -7,10 +7,7 @@ import fr.sae402.sharedpaint.metier.Rectangle;
 import fr.sae402.sharedpaint.networking.Client;
 import fr.sae402.sharedpaint.networking.Serveur;
 import fr.sae402.sharedpaint.metier.*;
-import fr.sae402.sharedpaint.ui.CercleUI;
-import fr.sae402.sharedpaint.ui.LigneUI;
-import fr.sae402.sharedpaint.ui.RectangleUI;
-import fr.sae402.sharedpaint.ui.TexteUI;
+import fr.sae402.sharedpaint.ui.*;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.geometry.Insets;
@@ -23,6 +20,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class MainController {
     private ToggleGroup toolToggleGroup;
@@ -32,11 +30,16 @@ public class MainController {
     private static final ArrayList<String> couleur = new ArrayList<>();
 
     private Metier metier;
+    private Serveur serveur;
+    private Client client;
+
 
     @FXML
     private FlowPane shapeTools;
     @FXML
     private AnchorPane paneDessin;
+    @FXML
+    private MenuItem menuHerbergement;
 
     @FXML
     public void initialize() {
@@ -44,18 +47,8 @@ public class MainController {
         this.toolToggleGroup    = new ToggleGroup();
         this.currentClient      = new Client("LOLILOL");
         for (OutilForme outil : OutilForme.getOutils()) {
-            ToggleButton toggleButton = new ToggleButton("");
-            ImageView imageView = new ImageView(new Image(outil.getIcon()));
-            imageView.setFitHeight(ICON_SIZE - 5);
-            imageView.setFitWidth(ICON_SIZE - 5);
-            toggleButton.setGraphic(imageView);
-            toggleButton.setToggleGroup(this.toolToggleGroup);
-            toggleButton.setMaxWidth(ICON_SIZE);
-            toggleButton.setMaxHeight(ICON_SIZE);
-            toggleButton.setMinWidth(ICON_SIZE);
-            toggleButton.setMinHeight(ICON_SIZE);
-            toggleButton.setPadding(new Insets(2, 2, 2, 2));
-            shapeTools.getChildren().add(toggleButton);
+            ImageToggleButton itb = new ImageToggleButton(outil.getIcon(), this.toolToggleGroup);
+            shapeTools.getChildren().add(itb);
         }
         couleur.add("black");
         couleur.add("white");
@@ -66,41 +59,14 @@ public class MainController {
 
 
 
-        ToggleButton fillBtn = new ToggleButton("");
-        ImageView imgFill = new ImageView(new Image(SharedPaint.class.getResourceAsStream("icons/fill.png")));
-        imgFill.setFitHeight(ICON_SIZE - 5);
-        imgFill.setFitWidth(ICON_SIZE - 5);
-        fillBtn.setGraphic(imgFill);
-        fillBtn.setMaxWidth(ICON_SIZE);
-        fillBtn.setMaxHeight(ICON_SIZE);
-        fillBtn.setMinWidth(ICON_SIZE);
-        fillBtn.setMinHeight(ICON_SIZE);
-        fillBtn.setPadding(new Insets(2, 2, 2, 2));
+        ImageToggleButton fillBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/fill.png"), null);
         shapeTools.getChildren().add(fillBtn);
 
-        ToggleButton undoBtn = new ToggleButton("");
-        ImageView imgUndo = new ImageView(new Image(SharedPaint.class.getResourceAsStream("icons/undo.png")));
-        imgUndo.setFitHeight(ICON_SIZE - 5);
-        imgUndo.setFitWidth(ICON_SIZE - 5);
-        undoBtn.setGraphic(imgUndo);
-        undoBtn.setMaxWidth(ICON_SIZE);
-        undoBtn.setMaxHeight(ICON_SIZE);
-        undoBtn.setMinWidth(ICON_SIZE);
-        undoBtn.setMinHeight(ICON_SIZE);
-        undoBtn.setPadding(new Insets(2, 2, 2, 2));
+        ImageToggleButton undoBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/undo.png"), null);
         shapeTools.getChildren().add(undoBtn);
 
         for(int i=0; i < couleur.size(); i++){
-            ToggleButton colBtn = new ToggleButton("");
-            ImageView imageView = new ImageView(new Image(SharedPaint.class.getResourceAsStream("icons/" + couleur.get(i) + ".png")));
-            imageView.setFitHeight(ICON_SIZE - 5);
-            imageView.setFitWidth(ICON_SIZE - 5);
-            colBtn.setGraphic(imageView);
-            colBtn.setMaxWidth(ICON_SIZE);
-            colBtn.setMaxHeight(ICON_SIZE);
-            colBtn.setMinWidth(ICON_SIZE);
-            colBtn.setMinHeight(ICON_SIZE);
-            colBtn.setPadding(new Insets(2, 2, 2, 2));
+            ImageToggleButton colBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/" + couleur.get(i) + ".png"), null);
             shapeTools.getChildren().add(colBtn);
         }
 
@@ -110,9 +76,6 @@ public class MainController {
         colPick.setPadding(new Insets(2, 2, 2, 2));
 
         shapeTools.getChildren().add(colPick);
-
-        new Thread(new Serveur()).start();
-        new Thread(new Client("LOLILOL")).start();
     }
 
     public void dessiner(MouseEvent e) {
@@ -147,6 +110,30 @@ public class MainController {
             this.paneDessin.getChildren().add(node);
         }
     }
+
+    public void hebergement() throws InterruptedException {
+        if (serveur == null) {
+            this.menuHerbergement.setText("Arrêter le partage");
+            this.serveur = new Serveur();
+            Thread serveurThread = new Thread(this.serveur);
+            TextInputDialog inputDialog = new TextInputDialog("Pseudo : ");
+            inputDialog.setTitle("Pseudo");
+            inputDialog.setHeaderText("Veuillez entrer votre pseudo.");
+            Optional<String> result = inputDialog.showAndWait();
+            this.client = new Client(result.get());
+            Thread clientThread = new Thread(this.client); // TODO: On doit vérifier que le pseudo entré est valide (donc pas vide)
+            clientThread.start();
+            Thread.sleep(20);
+            serveurThread.start();
+        } else {
+            this.menuHerbergement.setText("Partager");
+            this.serveur.stop();
+            this.serveur = null;
+            this.client.stop();
+            this.client = null;
+        }
+    }
+
     public void changerCouleur() {
         this.metier.changerCouleur();
     }
