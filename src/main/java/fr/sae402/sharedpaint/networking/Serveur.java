@@ -1,5 +1,6 @@
 package fr.sae402.sharedpaint.networking;
 
+import fr.sae402.sharedpaint.metier.Forme;
 import fr.sae402.sharedpaint.networking.packets.Commande;
 import fr.sae402.sharedpaint.networking.packets.ObjectPacket;
 import fr.sae402.sharedpaint.networking.packets.Packet;
@@ -7,10 +8,7 @@ import fr.sae402.sharedpaint.networking.packets.Packet;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -20,7 +18,7 @@ public class Serveur implements Runnable {
     private static final byte[] buffer = new byte[TAILLE_BUFFER];
 
     private DatagramSocket ds;
-    private HashMap<UUID, InetAddress> clients;
+    private HashMap<UUID, SocketAddress> clients;
     private boolean stop;
 
     public Serveur() {
@@ -43,12 +41,31 @@ public class Serveur implements Runnable {
                 case USER_CONNECT -> {
                     UUID clientUUID = (UUID) objectPacket.getObject();
                     System.out.println("Received client UUID : " + clientUUID);
-                    this.clients.put(clientUUID, data.getAddress());
+                    this.clients.put(clientUUID, data.getSocketAddress());
                 }
                 case STOP_CONNECTION -> {
                     UUID clientUUID = (UUID) objectPacket.getObject();
                     this.clients.remove(clientUUID);
                 }
+                case SEND_SHAPE -> {
+                    Forme forme = (Forme) objectPacket.getObject();
+                    System.out.println("Received a shape : " + forme.getClass().getTypeName());
+                    this.sendToAll(Commande.UPDATE_SHAPE, forme);
+                }
+            }
+        }
+    }
+
+    private void sendToAll(Commande commande, Forme forme) {
+        for (UUID uuid : this.clients.keySet()) {
+            byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.UPDATE_SHAPE, forme));
+            DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
+                    this.clients.get(uuid));
+            try {
+                System.out.println("Sending " + forme.getClass().getTypeName() + " to " + uuid);
+                this.ds.send(datagramPacket);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }

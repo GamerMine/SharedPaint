@@ -7,7 +7,7 @@ public class RectangleUI extends Rectangle {
     private fr.sae402.sharedpaint.metier.Rectangle rectangle;
 
     public RectangleUI(int posX, int posY, String couleur, boolean rempli, int longueur, int largeur) {
-        new fr.sae402.sharedpaint.metier.Rectangle( posX,  posY,  couleur,  rempli,  longueur,  largeur);
+        this.rectangle = new fr.sae402.sharedpaint.metier.Rectangle( posX,  posY,  couleur,  rempli,  longueur,  largeur);
         this.setX(posX);
         this.setY(posY);
         this.setHeight(longueur);
@@ -23,4 +23,8 @@ public class RectangleUI extends Rectangle {
         return new Point2D(this.getX(), this.getY());
     }
 
+
+    public fr.sae402.sharedpaint.metier.Rectangle getElementRectangle() {
+        return this.rectangle;
+    }
 }

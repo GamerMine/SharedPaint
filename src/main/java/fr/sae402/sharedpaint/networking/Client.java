@@ -1,32 +1,32 @@
 package fr.sae402.sharedpaint.networking;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import fr.sae402.sharedpaint.metier.Forme;
+ import fr.sae402.sharedpaint.metier.Forme;
 import fr.sae402.sharedpaint.networking.packets.Commande;
 import fr.sae402.sharedpaint.networking.packets.ObjectPacket;
+import fr.sae402.sharedpaint.networking.packets.Packet;
 
-import java.io.FileWriter;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.*;
+import java.io.ObjectInputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class Client implements Runnable {
     private UUID idClient;
     private String pseudo;
-    private Gson gsonBuilder;
-    private JsonArray historique;
     private boolean stop;
-
     private DatagramSocket ds;
+
+    private static final int TAILLE_BUFFER = 1024;
+    private static final byte[] buffer = new byte[TAILLE_BUFFER];
 
     public Client(String pseudo) {
         this.idClient = UUID.randomUUID();
         this.pseudo = pseudo;
-        this.gsonBuilder = new GsonBuilder().setPrettyPrinting().create();
-        this.historique = new JsonArray();
         try {
             this.ds = new DatagramSocket();
         } catch (SocketException e) {
@@ -41,7 +41,7 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        DatagramPacket datagramPacket = null;
+        DatagramPacket datagramPacket;
         try {
             byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.USER_CONNECT, this.idClient));
             datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), Serveur.PORT);
@@ -54,14 +54,40 @@ public class Client implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        DatagramPacket data = new DatagramPacket(buffer, TAILLE_BUFFER);
         while (!stop) {
             try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+                ds.receive(data);
+                traiter(data);
+            } catch (IOException | ClassNotFoundException ignored) {}
         }
         System.out.println("Client connection lost");
+    }
+
+    public void envoyerForme(Forme forme) {
+        byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.SEND_SHAPE, forme));
+        DatagramPacket datagramPacket;
+        try {
+            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), Serveur.PORT); // TODO: localhost a modifier
+            this.ds.send(datagramPacket);
+        } catch (Exception ignored) {}
+    }
+
+    public void traiter(DatagramPacket data) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream byteStream = new ByteArrayInputStream(data.getData());
+        ObjectInputStream objectStream = new ObjectInputStream(byteStream);
+        Packet packet = (Packet) objectStream.readObject();
+
+        if (packet instanceof ObjectPacket objectPacket) {
+            switch (packet.getCommande()) {
+                case UPDATE_SHAPE -> {
+                    Forme forme = (Forme) objectPacket.getObject();
+                    System.out.println(this.idClient + " received shape : " + forme.getClass().getTypeName());
+                    // TODO: La forme doit être ajouter à une liste ou quelque chose de ce genre pour être mis à jour dans une boucle de maj de l'ui
+                }
+            }
+        }
     }
 
     public void stop() {

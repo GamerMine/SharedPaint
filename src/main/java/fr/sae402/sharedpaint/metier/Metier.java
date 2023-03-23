@@ -10,7 +10,7 @@ public class Metier {
 
     private MainController controller;
     private Color couleurActuel;
-    private Forme formeActuel;
+    private Class<? extends Forme> formeActuel;
     private boolean rempli;
     public Metier(MainController controller )
     {
@@ -21,7 +21,7 @@ public class Metier {
         return couleurActuel;
     }
 
-    public Forme getFormeActuel() {
+    public Class<? extends Forme> getFormeActuel() {
         return formeActuel;
     }
 
@@ -29,12 +29,12 @@ public class Metier {
         return rempli;
     }
 
-    public void changerCouleur() {
-
+    public void changerCouleur(Color couleur) {
+        this.couleurActuel = couleur;
     }
 
-    public void changerForme() {
-
+    public void changerForme(Class<? extends Forme> forme) {
+        this.formeActuel = forme;
     }
     public void chargerJSON() {
 

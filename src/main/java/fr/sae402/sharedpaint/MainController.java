@@ -8,6 +8,7 @@ import fr.sae402.sharedpaint.networking.Client;
 import fr.sae402.sharedpaint.networking.Serveur;
 import fr.sae402.sharedpaint.metier.*;
 import fr.sae402.sharedpaint.ui.*;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.geometry.Insets;
@@ -19,6 +20,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.paint.Color;
+
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -27,7 +30,7 @@ public class MainController {
     private final int ICON_SIZE = 32;
     private Client currentClient;
 
-    private static final ArrayList<String> couleur = new ArrayList<>();
+    private static final String[] COLORS = {"black", "white", "red", "blue", "yellow", "green"};
 
     private Metier metier;
     private Serveur serveur;
@@ -46,29 +49,29 @@ public class MainController {
         this.metier             = new Metier(this);
         this.toolToggleGroup    = new ToggleGroup();
         this.currentClient      = new Client("LOLILOL");
+
         for (OutilForme outil : OutilForme.getOutils()) {
-            ImageToggleButton itb = new ImageToggleButton(outil.getIcon(), this.toolToggleGroup);
-            shapeTools.getChildren().add(itb);
+            outil.setOnAction(this::toolButtonClick);
+            shapeTools.getChildren().add(outil);
         }
-        couleur.add("black");
-        couleur.add("white");
-        couleur.add("red");
-        couleur.add("blue");
-        couleur.add("yellow");
-        couleur.add("green");
-
-
+        OutilForme.getOutils().get(0).setSelected(true);
+        this.metier.changerForme(OutilForme.getOutils().get(0).getForme());
 
         ImageToggleButton fillBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/fill.png"), null);
-        shapeTools.getChildren().add(fillBtn);
-
         ImageToggleButton undoBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/undo.png"), null);
+
+        shapeTools.getChildren().add(fillBtn);
         shapeTools.getChildren().add(undoBtn);
 
-        for(int i=0; i < couleur.size(); i++){
-            ImageToggleButton colBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/" + couleur.get(i) + ".png"), null);
+        ToggleGroup groupeCouleur = new ToggleGroup();
+        for(int i=0; i < COLORS.length; i++){
+            ImageToggleButton colBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/" + COLORS[i] + ".png"), groupeCouleur);
+            colBtn.setId(COLORS[i]);
             shapeTools.getChildren().add(colBtn);
         }
+        groupeCouleur.getToggles().get(0).setSelected(true);
+        this.metier.changerCouleur(Color.valueOf(((ImageToggleButton)groupeCouleur.getToggles().get(0)).getId()));
+
 
         ColorPicker colPick = new ColorPicker();
         colPick.setPrefHeight(32);
@@ -78,36 +81,54 @@ public class MainController {
         shapeTools.getChildren().add(colPick);
     }
 
-    public void dessiner(MouseEvent e) {
+    private void toolButtonClick(ActionEvent e) {
+        OutilForme toggleButton = (OutilForme) e.getSource();
+        this.metier.changerForme(toggleButton.getForme());
+    }
+
+    public void dessiner(MouseEvent e) throws InstantiationException, IllegalAccessException {
         System.out.println("DESSINER"); //ACCES
         int posX = 0;
         int posY = 0;
-        if(e.getSource() == MouseEvent.MOUSE_PRESSED) {
+        if(e.getEventType() == MouseEvent.MOUSE_PRESSED) {
             System.out.println("BOUTON PRESS"); //PAS ACCES
             posX = (int) e.getX();
             posY = (int) e.getY();
         }
-        if(e.getSource() == MouseEvent.MOUSE_RELEASED) {
+        if(e.getEventType() == MouseEvent.MOUSE_RELEASED) {
             Node node = null;
+            Forme forme = null;
+
             System.out.println("BOUTON RELACHE"); // PAS ACCES
-            if(this.metier.getFormeActuel() instanceof Rectangle) {
-                node = new RectangleUI(posX, posY, this.metier.getCouleurActuel().toString(),  this.metier.isRempli(), (int) (e.getX()-posX), (int) (e.getY()-posY));
+            if(this.metier.getFormeActuel() == Rectangle.class) {
+                RectangleUI rectangleUI = new RectangleUI(posX, posY, this.metier.getCouleurActuel().toString(),  this.metier.isRempli(), (int) (e.getX()-posX), (int) (e.getY()-posY));
+                forme = rectangleUI.getElementRectangle();
+                node = rectangleUI;
             }
-            if(this.metier.getFormeActuel() instanceof Cercle) {
+            if(this.metier.getFormeActuel() == Cercle.class) {
                 //Calcul du Rayon
                 double distanceX = e.getX()-posX;
                 double distanceY = e.getY()-posY;
                 double rayon = Math.sqrt(Math.pow(distanceX,2)+Math.pow(distanceY,2));
+                CercleUI cercleUI = new CercleUI(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) rayon);
 
-                node = new CercleUI(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) rayon);
+                forme = cercleUI.getElementCercle();
+                node = cercleUI;
             }
-            if(this.metier.getFormeActuel() instanceof Ligne) {
-                node = new LigneUI(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) e.getX(), (int) e.getY());
+            if(this.metier.getFormeActuel() == Ligne.class) {
+                LigneUI ligneUI = new LigneUI(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) e.getX(), (int) e.getY());
+
+                forme = ligneUI.getElementLigne();
+                node = ligneUI;
             }
-            if(this.metier.getFormeActuel() instanceof Texte) {
-                node = new TexteUI(posX, posY, this.metier.getCouleurActuel().toString(), "TEXTE A EDIT");
+            if(this.metier.getFormeActuel() == Texte.class) {
+                TexteUI texteUI = new TexteUI(posX, posY, this.metier.getCouleurActuel().toString(), "TEXTE A EDIT");
+
+                forme = texteUI.getElementTexte();
+                node = texteUI;
             }
-            this.paneDessin.getChildren().add(node);
+            //this.paneDessin.getChildren().add(node);
+            this.client.envoyerForme(forme);
         }
     }
 
@@ -134,13 +155,6 @@ public class MainController {
         }
     }
 
-    public void changerCouleur() {
-        this.metier.changerCouleur();
-    }
-
-    public void changerForme() {
-        this.metier.changerForme();
-    }
     public void chargerJSON() {
         this.metier.chargerJSON();
     }

@@ -8,7 +8,7 @@ public class LigneUI extends Line {
     private Ligne ligne;
 
     public LigneUI(int posX, int posY, String couleur, boolean rempli, int posXFin, int posYFin) {
-        new Ligne( posX,  posY,  couleur,  rempli,  posXFin,  posYFin);
+        this.ligne = new Ligne( posX,  posY,  couleur,  rempli,  posXFin,  posYFin);
         this.setStartX(posX);
         this.setStartY(posY);
         this.setEndX(posXFin);
@@ -36,4 +36,7 @@ public class LigneUI extends Line {
         return new Point2D(this.getEndX(), this.getEndY());
     }
 
+    public Ligne getElementLigne() {
+        return this.ligne;
+    }
 }

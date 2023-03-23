@@ -17,7 +17,7 @@ public class ImageToggleButton extends ToggleButton {
         imageView.setFitHeight(ICON_SIZE - 5);
         imageView.setFitWidth(ICON_SIZE - 5);
         this.setGraphic(imageView);
-        if (toggleGroup == null) this.setToggleGroup(toggleGroup);
+        if (toggleGroup != null) this.setToggleGroup(toggleGroup);
         this.setMaxWidth(ICON_SIZE);
         this.setMaxHeight(ICON_SIZE);
         this.setMinWidth(ICON_SIZE);

@@ -1,14 +1,19 @@
 package fr.sae402.sharedpaint.metier;
 
 import fr.sae402.sharedpaint.SharedPaint;
+import fr.sae402.sharedpaint.ui.ImageToggleButton;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class OutilForme {
+public class OutilForme extends ImageToggleButton {
     private Class<? extends Forme> forme;
     private final InputStream icon;
     private static final ArrayList<OutilForme> outilFormes = new ArrayList<>();
+
+    private static final ToggleGroup groupeOutil = new ToggleGroup();
 
     // Add any tools that you want here
     public static final OutilForme RECTANGLE = new OutilForme(Rectangle.class, SharedPaint.class.getResourceAsStream("icons/rectangle.png"));
@@ -17,6 +22,7 @@ public class OutilForme {
     public static final OutilForme TEXTE     = new OutilForme(Texte.class, SharedPaint.class.getResourceAsStream("icons/text.png"));
 
     public OutilForme(Class<? extends Forme> forme, InputStream icon) {
+        super(icon, groupeOutil);
         this.forme = forme;
         this.icon = icon;
         OutilForme.outilFormes.add(this);
@@ -24,6 +30,10 @@ public class OutilForme {
 
     public InputStream getIcon() {
         return this.icon;
+    }
+
+    public Class<? extends Forme> getForme() {
+        return this.forme;
     }
 
     public static ArrayList<OutilForme> getOutils() {

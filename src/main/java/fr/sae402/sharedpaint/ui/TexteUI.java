@@ -8,7 +8,7 @@ public class TexteUI extends Text {
     private Texte texte;
 
     public TexteUI(int posX, int posY, String couleur, String texte ) {
-        new Texte( posX,  posY,  couleur,  texte );
+        this.texte = new Texte( posX,  posY,  couleur,  texte );
         this.setX(posX);
         this.setY(posY);
         this.setText(texte);
@@ -20,5 +20,9 @@ public class TexteUI extends Text {
 
     public String getTexte() {
         return this.getText();
+    }
+
+    public Texte getElementTexte() {
+        return this.texte;
     }
 }

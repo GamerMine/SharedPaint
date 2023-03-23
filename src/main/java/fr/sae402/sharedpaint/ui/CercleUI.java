@@ -8,7 +8,7 @@ public class CercleUI extends Circle {
     private Cercle cercle;
 
     public CercleUI(int posX, int posY,String couleur,boolean rempli, int radius) {
-        new Cercle(posX, posY, couleur, rempli, radius);
+        this.cercle = new Cercle(posX, posY, couleur, rempli, radius);
         this.setCenterX(posX);
         this.setCenterY(posY);
         this.setRadius(radius);
@@ -25,4 +25,7 @@ public class CercleUI extends Circle {
         return new Point2D(this.getCenterX(), this.getCenterY());
     }
 
+    public Cercle getElementCercle() {
+        return this.cercle;
+    }
 }
