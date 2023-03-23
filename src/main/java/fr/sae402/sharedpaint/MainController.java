@@ -178,4 +178,14 @@ public class MainController {
             this.client = null;
         }
     }
+
+    public void rejoindre() {
+        TextInputDialog inputDialog = new TextInputDialog("Pseudo : ");
+        inputDialog.setTitle("Pseudo");
+        inputDialog.setHeaderText("Veuillez entrer votre pseudo.");
+        Optional<String> result = inputDialog.showAndWait();
+        this.client = new Client(result.get(), this);
+        Thread clientThread = new Thread(this.client);
+        clientThread.start();
+    }
 }
