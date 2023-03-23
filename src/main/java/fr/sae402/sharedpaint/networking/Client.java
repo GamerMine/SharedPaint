@@ -1,9 +1,12 @@
 package fr.sae402.sharedpaint.networking;
 
- import fr.sae402.sharedpaint.metier.Forme;
+import fr.sae402.sharedpaint.MainController;
+import fr.sae402.sharedpaint.metier.Forme;
+import fr.sae402.sharedpaint.metier.Metier;
 import fr.sae402.sharedpaint.networking.packets.Commande;
 import fr.sae402.sharedpaint.networking.packets.ObjectPacket;
 import fr.sae402.sharedpaint.networking.packets.Packet;
+import javafx.application.Platform;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -12,7 +15,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class Client implements Runnable {
@@ -20,13 +22,16 @@ public class Client implements Runnable {
     private String pseudo;
     private boolean stop;
     private DatagramSocket ds;
+    private MainController ctrl;
 
     private static final int TAILLE_BUFFER = 1024;
     private static final byte[] buffer = new byte[TAILLE_BUFFER];
 
-    public Client(String pseudo) {
+    public Client(String pseudo, MainController ctrl) {
         this.idClient = UUID.randomUUID();
+        this.ctrl = ctrl;
         this.pseudo = pseudo;
+
         try {
             this.ds = new DatagramSocket();
         } catch (SocketException e) {
@@ -84,7 +89,7 @@ public class Client implements Runnable {
                 case UPDATE_SHAPE -> {
                     Forme forme = (Forme) objectPacket.getObject();
                     System.out.println(this.idClient + " received shape : " + forme.getClass().getTypeName());
-                    // TODO: La forme doit être ajouter à une liste ou quelque chose de ce genre pour être mis à jour dans une boucle de maj de l'ui
+                    Platform.runLater(() -> this.ctrl.ajouterElement(forme));
                 }
             }
         }

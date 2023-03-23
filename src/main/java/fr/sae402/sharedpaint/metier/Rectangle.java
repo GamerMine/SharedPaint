@@ -10,4 +10,12 @@ public class Rectangle extends Forme{
         this.longueur = longueur;
         this.largeur = largeur;
     }
+
+    public int getLargeur() {
+        return largeur;
+    }
+
+    public int getLongueur() {
+        return longueur;
+    }
 }

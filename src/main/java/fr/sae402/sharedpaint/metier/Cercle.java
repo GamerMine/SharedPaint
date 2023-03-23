@@ -5,6 +5,9 @@ public class Cercle extends Forme {
     public Cercle(int posX, int posY, String couleur, boolean rempli, int rayon) {
         super(posX, posY, couleur, rempli);
         this.rayon = rayon;
+    }
 
+    public int getRayon() {
+        return rayon;
     }
 }

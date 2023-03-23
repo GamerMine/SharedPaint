@@ -10,9 +10,18 @@ public class RectangleUI extends Rectangle {
         this.rectangle = new fr.sae402.sharedpaint.metier.Rectangle( posX,  posY,  couleur,  rempli,  longueur,  largeur);
         this.setX(posX);
         this.setY(posY);
-        this.setHeight(longueur);
-        this.setWidth(largeur);
+        this.setHeight(largeur);
+        this.setWidth(longueur);
     }
+
+    public RectangleUI(fr.sae402.sharedpaint.metier.Rectangle rectangle) {
+        this.rectangle = rectangle;
+        this.setX(rectangle.getPosX());
+        this.setY(rectangle.getPosY());
+        this.setHeight(rectangle.getLargeur());
+        this.setWidth(rectangle.getLongueur());
+    }
+
     public int getLongueur() {
         return (int)this.getHeight();
     }

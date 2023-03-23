@@ -15,6 +15,14 @@ public class LigneUI extends Line {
         this.setEndY(posYFin);
     }
 
+    public LigneUI(Ligne ligne) {
+        this.ligne = ligne;
+        this.setStartX(ligne.getPosX());
+        this.setStartY(ligne.getPosY());
+        this.setEndX(ligne.getPosXFin());
+        this.setEndY(ligne.getPosYFin());
+    }
+
     public int getDebPosX() {
         return (int) this.getStartX();
     }

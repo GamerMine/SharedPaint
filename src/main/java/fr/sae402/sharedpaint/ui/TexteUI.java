@@ -14,6 +14,13 @@ public class TexteUI extends Text {
         this.setText(texte);
     }
 
+    public TexteUI(Texte texte) {
+        this.texte = texte;
+        this.setX(texte.getPosX());
+        this.setY(texte.getPosY());
+        this.setText(texte.getTexte());
+    }
+
     public Point2D getCoordonnee() {
         return new Point2D(this.getX(), this.getY());
     }

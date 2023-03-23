@@ -6,4 +6,8 @@ public class Texte extends Forme {
         super(posX, posY, couleur, true);
         this.texte = texte;
     }
+
+    public String getTexte() {
+        return texte;
+    }
 }

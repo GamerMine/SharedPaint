@@ -26,16 +26,14 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public class MainController {
-    private ToggleGroup toolToggleGroup;
-    private final int ICON_SIZE = 32;
-    private Client currentClient;
-
     private static final String[] COLORS = {"black", "white", "red", "blue", "yellow", "green"};
 
     private Metier metier;
     private Serveur serveur;
     private Client client;
 
+    private int posX, posY;
+    private ArrayList<Forme> uiElements;
 
     @FXML
     private FlowPane shapeTools;
@@ -46,10 +44,10 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        this.metier             = new Metier(this);
-        this.toolToggleGroup    = new ToggleGroup();
-        this.currentClient      = new Client("LOLILOL");
+        this.metier     = new Metier(this);
+        this.uiElements = new ArrayList<>();
 
+        // Création des outils
         for (OutilForme outil : OutilForme.getOutils()) {
             outil.setOnAction(this::toolButtonClick);
             shapeTools.getChildren().add(outil);
@@ -63,6 +61,7 @@ public class MainController {
         shapeTools.getChildren().add(fillBtn);
         shapeTools.getChildren().add(undoBtn);
 
+        // Création des couleur par défaut
         ToggleGroup groupeCouleur = new ToggleGroup();
         for(int i=0; i < COLORS.length; i++){
             ImageToggleButton colBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/" + COLORS[i] + ".png"), groupeCouleur);
@@ -72,7 +71,7 @@ public class MainController {
         groupeCouleur.getToggles().get(0).setSelected(true);
         this.metier.changerCouleur(Color.valueOf(((ImageToggleButton)groupeCouleur.getToggles().get(0)).getId()));
 
-
+        // Création du Color Picker
         ColorPicker colPick = new ColorPicker();
         colPick.setPrefHeight(32);
         colPick.setPrefWidth(100);
@@ -86,49 +85,74 @@ public class MainController {
         this.metier.changerForme(toggleButton.getForme());
     }
 
-    public void dessiner(MouseEvent e) throws InstantiationException, IllegalAccessException {
-        System.out.println("DESSINER"); //ACCES
-        int posX = 0;
-        int posY = 0;
+    public void dessiner(MouseEvent e) {
         if(e.getEventType() == MouseEvent.MOUSE_PRESSED) {
-            System.out.println("BOUTON PRESS"); //PAS ACCES
             posX = (int) e.getX();
             posY = (int) e.getY();
         }
         if(e.getEventType() == MouseEvent.MOUSE_RELEASED) {
-            Node node = null;
             Forme forme = null;
 
-            System.out.println("BOUTON RELACHE"); // PAS ACCES
             if(this.metier.getFormeActuel() == Rectangle.class) {
-                RectangleUI rectangleUI = new RectangleUI(posX, posY, this.metier.getCouleurActuel().toString(),  this.metier.isRempli(), (int) (e.getX()-posX), (int) (e.getY()-posY));
-                forme = rectangleUI.getElementRectangle();
-                node = rectangleUI;
+                forme = new Rectangle(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) (e.getX()-posX), (int) (e.getY() - posY));
             }
+
             if(this.metier.getFormeActuel() == Cercle.class) {
                 //Calcul du Rayon
                 double distanceX = e.getX()-posX;
                 double distanceY = e.getY()-posY;
                 double rayon = Math.sqrt(Math.pow(distanceX,2)+Math.pow(distanceY,2));
-                CercleUI cercleUI = new CercleUI(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) rayon);
 
-                forme = cercleUI.getElementCercle();
-                node = cercleUI;
+                forme = new Cercle(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) rayon);
             }
+
             if(this.metier.getFormeActuel() == Ligne.class) {
-                LigneUI ligneUI = new LigneUI(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) e.getX(), (int) e.getY());
-
-                forme = ligneUI.getElementLigne();
-                node = ligneUI;
+                forme = new Ligne(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) e.getX(), (int) e.getY());
             }
+
             if(this.metier.getFormeActuel() == Texte.class) {
-                TexteUI texteUI = new TexteUI(posX, posY, this.metier.getCouleurActuel().toString(), "TEXTE A EDIT");
-
-                forme = texteUI.getElementTexte();
-                node = texteUI;
+                forme = new Texte(posX, posY, this.metier.getCouleurActuel().toString(), "TEXTE A EDIT");
             }
-            //this.paneDessin.getChildren().add(node);
+
+            this.uiElements.add(forme);
             this.client.envoyerForme(forme);
+            System.out.println("dessiner()");
+            this.uiMaj();
+        }
+    }
+
+    public void ajouterElement(Forme forme) {
+        for (Forme f : this.uiElements) {
+            if (f.equals(forme)) {
+                return;
+            }
+        }
+        this.uiElements.add(forme);
+        System.out.println("ajouterElement()");
+        this.uiMaj();
+    }
+
+    private void uiMaj() {
+        // Supression des éléments existants
+        for (Forme forme : this.uiElements) {
+            this.paneDessin.getChildren().remove(forme);
+        }
+
+        // Mise à jour des nodes sur l'affichage
+        for (Forme forme : this.uiElements) {
+            Node node = null;
+
+            if (forme instanceof Rectangle shape) {
+                node = new RectangleUI(shape);
+            } else if (forme instanceof Cercle shape) {
+                node = new CercleUI(shape);
+            } else if (forme instanceof Ligne shape) {
+                node = new LigneUI(shape);
+            } else if (forme instanceof Texte shape) {
+                node = new TexteUI(shape);
+            }
+
+            this.paneDessin.getChildren().add(node);
         }
     }
 
@@ -141,7 +165,7 @@ public class MainController {
             inputDialog.setTitle("Pseudo");
             inputDialog.setHeaderText("Veuillez entrer votre pseudo.");
             Optional<String> result = inputDialog.showAndWait();
-            this.client = new Client(result.get());
+            this.client = new Client(result.get(), this);
             Thread clientThread = new Thread(this.client); // TODO: On doit vérifier que le pseudo entré est valide (donc pas vide)
             clientThread.start();
             Thread.sleep(20);
@@ -153,13 +177,5 @@ public class MainController {
             this.client.stop();
             this.client = null;
         }
-    }
-
-    public void chargerJSON() {
-        this.metier.chargerJSON();
-    }
-
-    public void ecrireJSON() {
-        this.metier.ecrireJSON();
     }
 }

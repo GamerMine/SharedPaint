@@ -14,6 +14,13 @@ public class CercleUI extends Circle {
         this.setRadius(radius);
     }
 
+    public CercleUI(Cercle cercle) {
+        this.cercle = cercle;
+        this.setCenterX(cercle.getPosX());
+        this.setCenterX(cercle.getPosY());
+        this.setRadius(cercle.getRayon());
+    }
+
     public int getX() {
         return (int) this.getCenterX();
     }

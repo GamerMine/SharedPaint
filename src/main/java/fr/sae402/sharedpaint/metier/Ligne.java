@@ -8,4 +8,12 @@ public class Ligne extends Forme{
         this.posXFin = posXFin;
         this.posYFin = posYFin;
     }
+
+    public int getPosXFin() {
+        return posXFin;
+    }
+
+    public int getPosYFin() {
+        return posYFin;
+    }
 }
