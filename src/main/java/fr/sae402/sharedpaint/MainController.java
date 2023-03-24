@@ -269,7 +269,7 @@ public class MainController {
             this.menuRejoindre.setDisable(true);
             this.serveur = new Serveur();
             Thread serveurThread = new Thread(this.serveur);
-            Thread clientThread = new Thread(this.client); // TODO: On doit vérifier que le pseudo entré est valide (donc pas vide)
+            Thread clientThread = new Thread(this.client);
             clientThread.start();
             Thread.sleep(20);
             serveurThread.start();
