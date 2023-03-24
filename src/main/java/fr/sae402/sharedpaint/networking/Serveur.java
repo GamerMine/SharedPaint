@@ -92,7 +92,6 @@ public class Serveur implements Runnable {
             DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
                     this.clients.get(uuid));
             try {
-                System.out.println("Sending " + forme.getClass().getTypeName() + " to " + uuid);
                 this.ds.send(datagramPacket);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -114,6 +113,7 @@ public class Serveur implements Runnable {
     }
 
     public void stop() {
+        this.sendToAll(Commande.STOP_CONNECTION, null);
         ds.close();
         this.stop = true;
     }
