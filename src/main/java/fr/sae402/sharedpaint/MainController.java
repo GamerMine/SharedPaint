@@ -57,6 +57,7 @@ public class MainController {
 
         ImageToggleButton fillBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/fill.png"), null);
         ImageToggleButton undoBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/undo.png"), null);
+        undoBtn.setOnAction(this::undo);
 
         shapeTools.getChildren().add(fillBtn);
         shapeTools.getChildren().add(undoBtn);
@@ -66,6 +67,7 @@ public class MainController {
         for(int i=0; i < COLORS.length; i++){
             ImageToggleButton colBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/" + COLORS[i] + ".png"), groupeCouleur);
             colBtn.setId(COLORS[i]);
+            colBtn.setOnAction(this::colBtnClick);
             shapeTools.getChildren().add(colBtn);
         }
         groupeCouleur.getToggles().get(0).setSelected(true);
@@ -78,6 +80,21 @@ public class MainController {
         colPick.setPadding(new Insets(2, 2, 2, 2));
 
         shapeTools.getChildren().add(colPick);
+    }
+
+    private void undo(ActionEvent e) {
+        Forme suppForme = this.client.undoClientForme();
+        for (Forme forme : this.uiElements) {
+            if (forme.equals(suppForme)) {
+                this.uiElements.remove(forme);
+            }
+        }
+    }
+
+    private void colBtnClick(ActionEvent e) {
+        ImageToggleButton colBtn = (ImageToggleButton) e.getSource();
+        System.out.println(Color.valueOf(colBtn.getId()));
+        this.metier.changerCouleur(Color.valueOf(colBtn.getId()));
     }
 
     private void toolButtonClick(ActionEvent e) {
@@ -94,7 +111,12 @@ public class MainController {
             Forme forme = null;
 
             if(this.metier.getFormeActuel() == Rectangle.class) {
-                forme = new Rectangle(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) (e.getX()-posX), (int) (e.getY() - posY));
+                int minX = Math.min(posX, (int)e.getX());
+                int minY = Math.min(posY, (int)e.getY());
+                int finX = Math.abs(posX - (int)e.getX());
+                int finY = Math.abs(posY - (int)e.getY());
+
+                forme = new Rectangle(minX, minY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), finX, finY);
             }
 
             if(this.metier.getFormeActuel() == Cercle.class) {
@@ -116,6 +138,7 @@ public class MainController {
 
             this.uiElements.add(forme);
             this.client.envoyerForme(forme);
+            this.client.ajouterClientForme(forme);
             System.out.println("dessiner()");
             this.uiMaj();
         }
@@ -187,5 +210,13 @@ public class MainController {
         this.client = new Client(result.get(), this);
         Thread clientThread = new Thread(this.client);
         clientThread.start();
+    }
+
+    public void removeElement(Forme forme) {
+        for (Forme f : this.uiElements) {
+            if (f.equals(forme)) {
+                this.uiElements.remove(f);
+            }
+        }
     }
 }

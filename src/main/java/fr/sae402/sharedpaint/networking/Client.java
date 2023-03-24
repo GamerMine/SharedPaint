@@ -15,6 +15,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.LinkedList;
 import java.util.UUID;
 
 public class Client implements Runnable {
@@ -23,6 +24,7 @@ public class Client implements Runnable {
     private boolean stop;
     private DatagramSocket ds;
     private MainController ctrl;
+    private LinkedList<Forme> formesClient;
 
     private static final int TAILLE_BUFFER = 1024;
     private static final byte[] buffer = new byte[TAILLE_BUFFER];
@@ -31,6 +33,7 @@ public class Client implements Runnable {
         this.idClient = UUID.randomUUID();
         this.ctrl = ctrl;
         this.pseudo = pseudo;
+        this.formesClient = new LinkedList<>();
 
         try {
             this.ds = new DatagramSocket();
@@ -50,11 +53,10 @@ public class Client implements Runnable {
         try {
             byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.USER_CONNECT, this.idClient));
             datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), Serveur.PORT);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println("Envoie UUID de la part de : " + this.pseudo);
-        try {
+            System.out.println("Envoie UUID de la part de : " + this.pseudo);
+            ds.send(datagramPacket);
+            data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REQUEST_SHAPES, this.idClient));
+            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), Serveur.PORT);
             ds.send(datagramPacket);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -79,6 +81,10 @@ public class Client implements Runnable {
         } catch (Exception ignored) {}
     }
 
+    public void ajouterClientForme(Forme forme) {
+        this.formesClient.add(forme);
+    }
+
     public void traiter(DatagramPacket data) throws IOException, ClassNotFoundException {
         ByteArrayInputStream byteStream = new ByteArrayInputStream(data.getData());
         ObjectInputStream objectStream = new ObjectInputStream(byteStream);
@@ -86,10 +92,14 @@ public class Client implements Runnable {
 
         if (packet instanceof ObjectPacket objectPacket) {
             switch (packet.getCommande()) {
-                case UPDATE_SHAPE -> {
+                case SEND_SHAPE -> {
                     Forme forme = (Forme) objectPacket.getObject();
                     System.out.println(this.idClient + " received shape : " + forme.getClass().getTypeName());
                     Platform.runLater(() -> this.ctrl.ajouterElement(forme));
+                }
+                case REMOVE_SHAPE -> {
+                    Forme forme = (Forme) objectPacket.getObject();
+                    Platform.runLater(() -> this.ctrl.removeElement(forme));
                 }
             }
         }
@@ -98,5 +108,16 @@ public class Client implements Runnable {
     public void stop() {
         ds.close();
         this.stop = true;
+    }
+
+    public Forme undoClientForme() {
+        Forme undoForme = this.formesClient.removeLast();
+        byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REMOVE_SHAPE, undoForme));
+        DatagramPacket datagramPacket;
+        try {
+            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), Serveur.PORT); // TODO: localhost a modifier
+            this.ds.send(datagramPacket);
+        } catch (Exception ignored) {}
+        return undoForme;
     }
 }
