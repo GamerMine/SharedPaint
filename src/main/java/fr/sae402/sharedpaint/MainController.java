@@ -135,6 +135,21 @@ public class MainController {
                     ((CercleUI)this.elementFantome).setRadius(rayon);
                 }
             }
+            if(this.metier.getFormeActuel() == Ellipse.class) {
+                //Calcul du rayonX et rayonY
+                double distanceX = e.getX()-posX;
+                double distanceY = e.getY()-posY;
+                double rayonX = distanceX/2;
+                double rayonY = distanceY/2;
+
+                if(this.elementFantome == null ) {
+                    this.elementFantome = new EllipseUI(new Ellipse(posX,posY,this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) rayonX, (int) rayonY));
+                } else {
+                    ((EllipseUI)this.elementFantome).setRadiusY(rayonY);
+                    ((EllipseUI)this.elementFantome).setRadiusX(rayonX);
+                }
+
+            }
             if (this.metier.getFormeActuel() == Ligne.class) {
                 if (this.elementFantome == null) {
                     this.elementFantome = new LigneUI(new Ligne(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int)e.getX(), (int)e.getY()));
@@ -183,6 +198,17 @@ public class MainController {
                 forme = new Texte(posX, posY, this.metier.getCouleurActuel().toString(), "TEXTE A EDIT");
             }
 
+            if(this.metier.getFormeActuel() == Ellipse.class) {
+                //Calcul du rayonX et rayonY
+                double distanceX = e.getX()-posX;
+                double distanceY = e.getY()-posY;
+                double rayonX = distanceX/2;
+                double rayonY = distanceY/2;
+
+
+                forme = new Ellipse(posX,posY,this.metier.getCouleurActuel().toString(),this.metier.isRempli(), (int) rayonX, (int) rayonY);
+            }
+
             this.uiElements.add(forme);
             this.client.envoyerForme(forme);
             this.client.ajouterClientForme(forme);
@@ -218,6 +244,8 @@ public class MainController {
                 node = new LigneUI(shape);
             } else if (forme instanceof Texte shape) {
                 node = new TexteUI(shape);
+            } else if (forme instanceof  Ellipse shape) {
+                node = new EllipseUI(shape);
             }
 
             this.paneDessin.getChildren().add(node);

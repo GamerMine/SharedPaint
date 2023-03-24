@@ -20,6 +20,7 @@ public class OutilForme extends ImageToggleButton {
     public static final OutilForme CERCLE    = new OutilForme(Cercle.class, SharedPaint.class.getResourceAsStream("icons/circle.png"));
     public static final OutilForme LIGNE     = new OutilForme(Ligne.class, SharedPaint.class.getResourceAsStream("icons/line.png"));
     public static final OutilForme TEXTE     = new OutilForme(Texte.class, SharedPaint.class.getResourceAsStream("icons/text.png"));
+    public static final OutilForme ELLIPSE   = new OutilForme(Ellipse.class, SharedPaint.class.getResourceAsStream("icons/ellipse.png"));
 
     public OutilForme(Class<? extends Forme> forme, InputStream icon) {
         super(icon, groupeOutil);
