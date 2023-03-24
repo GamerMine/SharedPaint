@@ -55,7 +55,6 @@ public class Client implements Runnable {
         try {
             byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.USER_CONNECT, this.idClient));
             datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(this.adresseServeur), Serveur.PORT);
-            System.out.println("Envoie UUID de la part de : " + this.pseudo);
             ds.send(datagramPacket);
             data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REQUEST_SHAPES, this.idClient));
             datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(this.adresseServeur), Serveur.PORT);
@@ -71,7 +70,6 @@ public class Client implements Runnable {
                 traiter(data);
             } catch (IOException | ClassNotFoundException ignored) {}
         }
-        System.out.println("Client connection lost");
     }
 
     public void envoyerForme(Forme forme) {
@@ -96,7 +94,6 @@ public class Client implements Runnable {
             switch (packet.getCommande()) {
                 case SEND_SHAPE -> {
                     Forme forme = (Forme) objectPacket.getObject();
-                    System.out.println(this.idClient + " received shape : " + forme.getClass().getTypeName());
                     Platform.runLater(() -> this.ctrl.ajouterElement(forme));
                 }
                 case REMOVE_SHAPE -> {

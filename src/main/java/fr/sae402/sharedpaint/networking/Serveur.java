@@ -43,7 +43,6 @@ public class Serveur implements Runnable {
             switch (packet.getCommande()) {
                 case USER_CONNECT -> {
                     UUID clientUUID = (UUID) objectPacket.getObject();
-                    System.out.println("Received client UUID : " + clientUUID);
                     this.clients.put(clientUUID, data.getSocketAddress());
                 }
                 case STOP_CONNECTION -> {
@@ -53,7 +52,6 @@ public class Serveur implements Runnable {
                 case SEND_SHAPE -> {
                     Forme forme = (Forme) objectPacket.getObject();
                     this.listFormes.add(forme);
-                    System.out.println("Received a shape : " + forme.getClass().getTypeName());
                     this.sendToAll(Commande.SEND_SHAPE, forme);
                 }
                 case REQUEST_SHAPES -> {
@@ -109,7 +107,6 @@ public class Serveur implements Runnable {
             } catch (IOException | ClassNotFoundException ignored) {
             }
         }
-        System.out.println("Server closed");
     }
 
     public void stop() {

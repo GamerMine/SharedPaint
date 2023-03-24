@@ -44,7 +44,11 @@ public class MainController {
     @FXML
     private FlowPane shapeTools;
     @FXML
+    private FlowPane colorFlowPane;
+    @FXML
     private AnchorPane paneDessin;
+    @FXML
+    private ScrollPane scrollDessin;
     @FXML
     private MenuItem menuHerbergement;
     @FXML
@@ -64,8 +68,8 @@ public class MainController {
         OutilForme.getOutils().get(0).setSelected(true);
         this.metier.changerForme(OutilForme.getOutils().get(0).getForme());
 
-        ImageToggleButton fillBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/fill.png"), null);
-        ImageToggleButton undoBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/undo.png"), null);
+        ImageToggleButton fillBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/fill.png"));
+        ImageButton undoBtn = new ImageButton(SharedPaint.class.getResourceAsStream("icons/undo.png"));
         undoBtn.setOnAction(this::undo);
 
         fillBtn.setId("Fill");
@@ -80,7 +84,7 @@ public class MainController {
             ImageToggleButton colBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/" + COLORS[i] + ".png"), groupeCouleur);
             colBtn.setId(COLORS[i]);
             colBtn.setOnAction(this::colBtnClick);
-            shapeTools.getChildren().add(colBtn);
+            this.colorFlowPane.getChildren().add(colBtn);
         }
         groupeCouleur.getToggles().get(0).setSelected(true);
         this.metier.changerCouleur(Color.valueOf(((ImageToggleButton)groupeCouleur.getToggles().get(0)).getId()));
@@ -92,8 +96,10 @@ public class MainController {
         colPick.setPadding(new Insets(2, 2, 2, 2));
         colPick.setOnAction(this::colorPicker);
 
-        shapeTools.getChildren().add(colPick);
+        this.colorFlowPane.getChildren().add(colPick);
 
+        this.paneDessin.prefWidthProperty().bind(this.scrollDessin.widthProperty());
+        this.paneDessin.prefHeightProperty().bind(this.scrollDessin.heightProperty());
     }
 
     private void colorPicker(ActionEvent e) {
@@ -118,18 +124,15 @@ public class MainController {
     }
 
     private void undo(ActionEvent e) {
-
+        if (this.client == null) return;
         Forme suppForme = this.client.undoClientForme();
         if (suppForme == null) return;
-        System.out.println(this.uiElements.size());
         this.uiElements.removeIf(forme -> forme.equals(suppForme));
-        System.out.println(this.uiElements.size());
         this.uiMaj();
     }
 
     private void colBtnClick(ActionEvent e) {
         ImageToggleButton colBtn = (ImageToggleButton) e.getSource();
-        System.out.println(Color.valueOf(colBtn.getId()));
         this.metier.changerCouleur(Color.valueOf(colBtn.getId()));
     }
 
@@ -139,6 +142,13 @@ public class MainController {
     }
 
     public void dessiner(MouseEvent e) {
+        if (this.client == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Vous devez créer ou rejoindre une zone dessin !");
+            alert.showAndWait();
+            return;
+        }
         if (e.getEventType() == MouseEvent.MOUSE_DRAGGED) {
             if (this.metier.getFormeActuel() == Rectangle.class) {
                 int minX = Math.min(posX, (int)e.getX());
@@ -186,6 +196,7 @@ public class MainController {
                     ((LigneUI)this.elementFantome).setEndY((int)e.getY());
                 }
             }
+            if (this.metier.getFormeActuel() == Texte.class) {return;}
             this.paneDessin.getChildren().remove(this.elementFantome);
             this.paneDessin.getChildren().add(this.elementFantome);
         } else {

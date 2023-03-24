@@ -15,7 +15,7 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fr.sae402.sharedpaint.MainController">
    <right>
-      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER" />
+      <VBox onMouseDragOver="#dessiner" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER" />
    </right>
    <left>
       <GridPane BorderPane.alignment="CENTER">
@@ -36,11 +36,23 @@
                   </AnchorPane>
               </content>
             </ScrollPane>
+            <ScrollPane fitToWidth="true" prefWidth="102.0" GridPane.rowIndex="1">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="102.0">
+                     <children>
+                        <FlowPane fx:id="colorFlowPane" prefWidth="102.0" />
+                     </children></AnchorPane>
+              </content>
+            </ScrollPane>
          </children>
       </GridPane>
    </left>
    <center>
-      <AnchorPane fx:id="paneDessin" onMouseDragged="#dessiner" onMousePressed="#dessiner" onMouseReleased="#dessiner" BorderPane.alignment="CENTER" />
+      <ScrollPane fx:id="scrollDessin" focusTraversable="false" onMousePressed="#dessiner" onMouseReleased="#dessiner" BorderPane.alignment="CENTER">
+         <content>
+            <AnchorPane fx:id="paneDessin" onMouseDragged="#dessiner" />
+         </content>
+      </ScrollPane>
    </center>
    <top>
       <MenuBar BorderPane.alignment="CENTER">

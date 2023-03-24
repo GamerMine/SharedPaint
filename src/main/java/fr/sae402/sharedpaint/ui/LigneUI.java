@@ -14,7 +14,7 @@ public class LigneUI extends Line {
         this.setStartY(ligne.getPosY());
         this.setEndX(ligne.getPosXFin());
         this.setEndY(ligne.getPosYFin());
-        this.setFill(Color.web(ligne.getCouleur()));
+        this.setStroke(Color.web(ligne.getCouleur()));
     }
 
     public int getDebPosX() {
