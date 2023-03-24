@@ -156,11 +156,8 @@ public class MainController {
                 }
             }
             if(this.metier.getFormeActuel() == Ellipse.class) {
-                //Calcul du rayonX et rayonY
-                double distanceX = e.getX()-posX;
-                double distanceY = e.getY()-posY;
-                double rayonX = distanceX/2;
-                double rayonY = distanceY/2;
+                double rayonX = Math.abs(e.getX() - posX) / 2.0;
+                double rayonY = Math.abs(e.getY() - posY) / 2.0;
 
                 if(this.elementFantome == null ) {
                     this.elementFantome = new EllipseUI(new Ellipse(posX,posY,this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) rayonX, (int) rayonY));
@@ -219,14 +216,10 @@ public class MainController {
             }
 
             if(this.metier.getFormeActuel() == Ellipse.class) {
-                //Calcul du rayonX et rayonY
-                double distanceX = e.getX()-posX;
-                double distanceY = e.getY()-posY;
-                double rayonX = distanceX/2;
-                double rayonY = distanceY/2;
+                double rayonX = Math.abs(e.getX() - posX) / 2.0;
+                double rayonY = Math.abs(e.getY() - posY) / 2.0;
 
-
-                forme = new Ellipse(posX,posY,this.metier.getCouleurActuel().toString(),this.metier.isRempli(), (int) rayonX, (int) rayonY);
+                forme = new Ellipse(posX, posY,this.metier.getCouleurActuel().toString(),this.metier.isRempli(), (int) rayonX, (int) rayonY);
             }
 
             this.uiElements.add(forme);

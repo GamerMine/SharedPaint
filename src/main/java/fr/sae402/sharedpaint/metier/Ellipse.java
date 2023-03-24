@@ -3,8 +3,8 @@ package fr.sae402.sharedpaint.metier;
 public class Ellipse extends Forme {
     private int rayonX;
     private int rayonY;
-    public Ellipse(int posX, int posY, String couleur, boolean rempli, int rayonX, int rayonY) {
-        super(posX, posY, couleur, rempli);
+    public Ellipse(int centreX, int centreY, String couleur, boolean rempli, int rayonX, int rayonY) {
+        super(centreX, centreY, couleur, rempli);
         this.rayonX = rayonX;
         this.rayonY = rayonY;
     }
