@@ -8,6 +8,8 @@ import fr.sae402.sharedpaint.networking.Client;
 import fr.sae402.sharedpaint.networking.Serveur;
 import fr.sae402.sharedpaint.metier.*;
 import fr.sae402.sharedpaint.ui.*;
+import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -31,6 +33,7 @@ public class MainController {
     private Metier metier;
     private Serveur serveur;
     private Client client;
+    private Node elementFantome;
 
     private int posX, posY;
     private ArrayList<Forme> uiElements;
@@ -46,6 +49,7 @@ public class MainController {
     public void initialize() {
         this.metier     = new Metier(this);
         this.uiElements = new ArrayList<>();
+        this.elementFantome = null;
 
         // Création des outils
         for (OutilForme outil : OutilForme.getOutils()) {
@@ -84,11 +88,10 @@ public class MainController {
 
     private void undo(ActionEvent e) {
         Forme suppForme = this.client.undoClientForme();
-        for (Forme forme : this.uiElements) {
-            if (forme.equals(suppForme)) {
-                this.uiElements.remove(forme);
-            }
-        }
+        System.out.println(this.uiElements.size());
+        this.uiElements.removeIf(forme -> forme.equals(suppForme));
+        System.out.println(this.uiElements.size());
+        this.uiMaj();
     }
 
     private void colBtnClick(ActionEvent e) {
@@ -103,10 +106,52 @@ public class MainController {
     }
 
     public void dessiner(MouseEvent e) {
+        if (e.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+            if (this.metier.getFormeActuel() == Rectangle.class) {
+                int minX = Math.min(posX, (int)e.getX());
+                int minY = Math.min(posY, (int)e.getY());
+                int finX = Math.abs(posX - (int)e.getX());
+                int finY = Math.abs(posY - (int)e.getY());
+
+                if (this.elementFantome == null) {
+                    this.elementFantome = new RectangleUI(new Rectangle(minX, minY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), finX, finY));
+                } else {
+                    ((RectangleUI)this.elementFantome).setX(minX);
+                    ((RectangleUI)this.elementFantome).setY(minY);
+                    ((RectangleUI)this.elementFantome).setWidth(finX);
+                    ((RectangleUI)this.elementFantome).setHeight(finY);
+                }
+            }
+            if (this.metier.getFormeActuel() == Cercle.class) {
+                double distanceX = e.getX()-posX;
+                double distanceY = e.getY()-posY;
+                double rayon = Math.sqrt(Math.pow(distanceX,2)+Math.pow(distanceY,2));
+
+                if (this.elementFantome == null) {
+                    this.elementFantome = new CercleUI(new Cercle(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int) rayon));
+                } else {
+                    ((CercleUI)this.elementFantome).setRadius(rayon);
+                }
+            }
+            if (this.metier.getFormeActuel() == Ligne.class) {
+                if (this.elementFantome == null) {
+                    this.elementFantome = new LigneUI(new Ligne(posX, posY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), (int)e.getX(), (int)e.getY()));
+                } else {
+                    ((LigneUI)this.elementFantome).setEndX((int)e.getX());
+                    ((LigneUI)this.elementFantome).setEndY((int)e.getY());
+                }
+            }
+            this.paneDessin.getChildren().remove(this.elementFantome);
+            this.paneDessin.getChildren().add(this.elementFantome);
+        } else {
+            this.paneDessin.getChildren().remove(this.elementFantome);
+            this.elementFantome = null;
+        }
         if(e.getEventType() == MouseEvent.MOUSE_PRESSED) {
             posX = (int) e.getX();
             posY = (int) e.getY();
         }
+
         if(e.getEventType() == MouseEvent.MOUSE_RELEASED) {
             Forme forme = null;
 
@@ -157,9 +202,7 @@ public class MainController {
 
     private void uiMaj() {
         // Supression des éléments existants
-        for (Forme forme : this.uiElements) {
-            this.paneDessin.getChildren().remove(forme);
-        }
+        this.paneDessin.getChildren().clear();
 
         // Mise à jour des nodes sur l'affichage
         for (Forme forme : this.uiElements) {
@@ -213,10 +256,7 @@ public class MainController {
     }
 
     public void removeElement(Forme forme) {
-        for (Forme f : this.uiElements) {
-            if (f.equals(forme)) {
-                this.uiElements.remove(f);
-            }
-        }
+        this.uiElements.removeIf(f -> f.equals(forme));
+        this.uiMaj();
     }
 }

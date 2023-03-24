@@ -2,11 +2,11 @@ package fr.sae402.sharedpaint.networking;
 
 import fr.sae402.sharedpaint.MainController;
 import fr.sae402.sharedpaint.metier.Forme;
-import fr.sae402.sharedpaint.metier.Metier;
 import fr.sae402.sharedpaint.networking.packets.Commande;
 import fr.sae402.sharedpaint.networking.packets.ObjectPacket;
 import fr.sae402.sharedpaint.networking.packets.Packet;
 import javafx.application.Platform;
+import javafx.scene.Node;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -62,11 +62,7 @@ public class Serveur implements Runnable {
                 }
                 case REMOVE_SHAPE -> {
                     Forme forme = (Forme) objectPacket.getObject();
-                    for (Forme f : this.listFormes) {
-                        if (f.equals(forme)) {
-                            this.listFormes.remove(f);
-                        }
-                    }
+                    this.listFormes.removeIf(f -> f.equals(forme));
                     this.sendToAll(Commande.REMOVE_SHAPE, forme);
                 }
             }
@@ -77,7 +73,7 @@ public class Serveur implements Runnable {
         switch (commande) {
             case REQUEST_SHAPES -> {
                  for (Forme forme : this.listFormes) {
-                     byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.UPDATE_SHAPE, forme));
+                     byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.SEND_SHAPE, forme));
                      DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
                              this.clients.get(clientUUID));
                      try {
