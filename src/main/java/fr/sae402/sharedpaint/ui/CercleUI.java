@@ -13,7 +13,12 @@ public class CercleUI extends Circle {
         this.setCenterX(cercle.getPosX());
         this.setCenterY(cercle.getPosY());
         this.setRadius(cercle.getRayon());
-        this.setFill(Color.web(cercle.getCouleur()));
+        if(cercle.getRempli() == false){
+            this.setFill(Color.TRANSPARENT);
+            this.setStroke(Color.web(cercle.getCouleur()));
+        }else{
+            this.setFill(Color.web(cercle.getCouleur()));
+        }
     }
 
     public int getX() {

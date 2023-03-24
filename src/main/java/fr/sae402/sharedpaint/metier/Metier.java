@@ -29,6 +29,8 @@ public class Metier {
         return rempli;
     }
 
+    public boolean setRempli(Boolean b){return rempli = b;}
+
     public void changerCouleur(Color couleur) {
         this.couleurActuel = couleur;
     }

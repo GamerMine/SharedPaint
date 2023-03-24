@@ -13,9 +13,13 @@ public class RectangleUI extends Rectangle {
         this.setY(rectangle.getPosY());
         this.setHeight(rectangle.getLargeur());
         this.setWidth(rectangle.getLongueur());
-        this.setFill(Color.web(rectangle.getCouleur()));
+        if(rectangle.getRempli() == false){
+            this.setFill(Color.TRANSPARENT);
+            this.setStroke(Color.web(rectangle.getCouleur()));
+        }else{
+            this.setFill(Color.web(rectangle.getCouleur()));
+        }
     }
-
     public int getLongueur() {
         return (int)this.getHeight();
     }

@@ -104,13 +104,16 @@ public class MainController {
 
     private void btnFill(ActionEvent e) {
         ImageToggleButton btnFill = (ImageToggleButton) e.getSource();
+        Boolean rempli = true;
         if(btnFill.isSelected()) {
             ImageView img = new ImageView(new Image(SharedPaint.class.getResourceAsStream("icons/circle.png")));
             btnFill.setGraphic(img);
+            this.metier.setRempli(rempli);
         }else{
+            rempli = false;
             ImageView img = new ImageView(new Image(SharedPaint.class.getResourceAsStream("icons/fill.png")));
             btnFill.setGraphic(img);
-
+            this.metier.setRempli(rempli);
         }
     }
 
