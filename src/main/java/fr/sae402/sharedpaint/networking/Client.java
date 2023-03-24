@@ -21,6 +21,7 @@ import java.util.UUID;
 public class Client implements Runnable {
     private UUID idClient;
     private String pseudo;
+    private String adresseServeur;
     private boolean stop;
     private DatagramSocket ds;
     private MainController ctrl;
@@ -29,10 +30,11 @@ public class Client implements Runnable {
     private static final int TAILLE_BUFFER = 1024;
     private static final byte[] buffer = new byte[TAILLE_BUFFER];
 
-    public Client(String pseudo, MainController ctrl) {
+    public Client(String pseudo, String adresseServeur, MainController ctrl) {
         this.idClient = UUID.randomUUID();
         this.ctrl = ctrl;
         this.pseudo = pseudo;
+        this.adresseServeur = adresseServeur;
         this.formesClient = new LinkedList<>();
 
         try {
@@ -52,11 +54,11 @@ public class Client implements Runnable {
         DatagramPacket datagramPacket;
         try {
             byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.USER_CONNECT, this.idClient));
-            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), Serveur.PORT);
+            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(this.adresseServeur), Serveur.PORT);
             System.out.println("Envoie UUID de la part de : " + this.pseudo);
             ds.send(datagramPacket);
             data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REQUEST_SHAPES, this.idClient));
-            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), Serveur.PORT);
+            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(this.adresseServeur), Serveur.PORT);
             ds.send(datagramPacket);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -76,7 +78,7 @@ public class Client implements Runnable {
         byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.SEND_SHAPE, forme));
         DatagramPacket datagramPacket;
         try {
-            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), Serveur.PORT); // TODO: localhost a modifier
+            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(this.adresseServeur), Serveur.PORT);
             this.ds.send(datagramPacket);
         } catch (Exception ignored) {}
     }
@@ -101,6 +103,9 @@ public class Client implements Runnable {
                     Forme forme = (Forme) objectPacket.getObject();
                     Platform.runLater(() -> this.ctrl.removeElement(forme));
                 }
+                case STOP_CONNECTION -> {
+                    Platform.runLater(() -> this.ctrl.deconnexion());
+                }
             }
         }
     }
@@ -116,7 +121,7 @@ public class Client implements Runnable {
         byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REMOVE_SHAPE, undoForme));
         DatagramPacket datagramPacket;
         try {
-            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), Serveur.PORT); // TODO: localhost a modifier
+            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(this.adresseServeur), Serveur.PORT);
             this.ds.send(datagramPacket);
         } catch (Exception ignored) {}
         return undoForme;

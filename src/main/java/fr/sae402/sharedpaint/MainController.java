@@ -22,7 +22,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -44,6 +47,8 @@ public class MainController {
     private AnchorPane paneDessin;
     @FXML
     private MenuItem menuHerbergement;
+    @FXML
+    private MenuItem menuRejoindre;
 
     @FXML
     public void initialize() {
@@ -186,7 +191,6 @@ public class MainController {
             this.uiElements.add(forme);
             this.client.envoyerForme(forme);
             this.client.ajouterClientForme(forme);
-            System.out.println("dessiner()");
             this.uiMaj();
         }
     }
@@ -198,7 +202,6 @@ public class MainController {
             }
         }
         this.uiElements.add(forme);
-        System.out.println("ajouterElement()");
         this.uiMaj();
     }
 
@@ -226,39 +229,138 @@ public class MainController {
 
     public void hebergement() throws InterruptedException {
         if (serveur == null) {
+            Dialog<String> dialog = new Dialog<>();
+            dialog.setTitle("Hébergement");
+            dialog.setHeaderText("Veuillez entrer un pseudo");
+
+            ButtonType btnHost = new ButtonType("Héberger", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(btnHost, ButtonType.CANCEL);
+
+            GridPane gridPane = new GridPane();
+            gridPane.setHgap(10);
+            gridPane.setVgap(10);
+            gridPane.setPadding(new Insets(20, 100, 10, 10));
+
+            TextField pseudo = new TextField();
+            pseudo.setPromptText("Pseudo");
+
+            gridPane.add(new Label("Pseudo:"), 0, 0);
+            gridPane.add(pseudo, 1, 0);
+
+            Node hostBtn = dialog.getDialogPane().lookupButton(btnHost);
+            hostBtn.setDisable(true);
+
+            pseudo.textProperty().addListener(((observable, oldValue, newValue) -> hostBtn.setDisable(newValue.trim().isEmpty())));
+
+            dialog.getDialogPane().setContent(gridPane);
+
+            dialog.setResultConverter(dialogBtn -> {
+                if (dialogBtn == btnHost) {
+                    return pseudo.getText();
+                }
+                return null;
+            });
+
+            Optional<String> result = dialog.showAndWait();
+
+            if (result.isEmpty()) return;
+            this.client = new Client(result.get(), "localhost", this);
             this.menuHerbergement.setText("Arrêter le partage");
+            this.menuRejoindre.setDisable(true);
             this.serveur = new Serveur();
             Thread serveurThread = new Thread(this.serveur);
-            TextInputDialog inputDialog = new TextInputDialog("Pseudo : ");
-            inputDialog.setTitle("Pseudo");
-            inputDialog.setHeaderText("Veuillez entrer votre pseudo.");
-            Optional<String> result = inputDialog.showAndWait();
-            this.client = new Client(result.get(), this);
             Thread clientThread = new Thread(this.client); // TODO: On doit vérifier que le pseudo entré est valide (donc pas vide)
             clientThread.start();
             Thread.sleep(20);
             serveurThread.start();
         } else {
             this.menuHerbergement.setText("Partager");
-            this.serveur.stop();
-            this.serveur = null;
+            this.menuRejoindre.setDisable(false);
             this.client.stop();
             this.client = null;
+            this.serveur.stop();
+            this.serveur = null;
+            this.uiElements.clear();
+            this.paneDessin.getChildren().clear();
+            uiMaj();
         }
     }
 
     public void rejoindre() {
-        TextInputDialog inputDialog = new TextInputDialog("Pseudo : ");
-        inputDialog.setTitle("Pseudo");
-        inputDialog.setHeaderText("Veuillez entrer votre pseudo.");
-        Optional<String> result = inputDialog.showAndWait();
-        this.client = new Client(result.get(), this);
-        Thread clientThread = new Thread(this.client);
-        clientThread.start();
+        if (this.client == null) {
+            Dialog<Pair<String, String>> dialog = new Dialog<>();
+            dialog.setTitle("Connexion");
+            dialog.setHeaderText("Veuillez entrer les informations de connexion");
+
+            ButtonType btnConnexion = new ButtonType("Connexion", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(btnConnexion, ButtonType.CANCEL);
+
+            GridPane gridPane = new GridPane();
+            gridPane.setHgap(10);
+            gridPane.setVgap(10);
+            gridPane.setPadding(new Insets(20, 100, 10, 10));
+
+            TextField pseudo = new TextField();
+            pseudo.setPromptText("Pseudo");
+            TextField adresse = new TextField();
+            adresse.setPromptText("Adresse");
+
+            gridPane.add(new Label("Pseudo:"), 0, 0);
+            gridPane.add(pseudo, 1, 0);
+            gridPane.add(new Label("Adresse:"), 0, 1);
+            gridPane.add(adresse, 1, 1);
+
+            Node connectBtn = dialog.getDialogPane().lookupButton(btnConnexion);
+            connectBtn.setDisable(true);
+
+            pseudo.textProperty().addListener(((observable, oldValue, newValue) -> {
+                connectBtn.setDisable(newValue.trim().isEmpty() && adresse.getText().isEmpty());
+            }));
+
+            dialog.getDialogPane().setContent(gridPane);
+
+            dialog.setResultConverter(dialogBtn -> {
+                if (dialogBtn == btnConnexion) {
+                    return new Pair<>(pseudo.getText(), adresse.getText());
+                }
+                return null;
+            });
+
+            Optional<Pair<String, String>> result = dialog.showAndWait();
+            if (result.isEmpty()) return;
+            this.menuRejoindre.setText("Déconnexion");
+            this.menuHerbergement.setDisable(true);
+            this.client = new Client(result.get().getKey(), result.get().getValue(), this);
+            Thread clientThread = new Thread(this.client);
+            clientThread.start();
+        } else {
+            deconnexion();
+        }
+    }
+
+    public void deconnexion() {
+        this.menuRejoindre.setText("Rejoindre");
+        this.menuHerbergement.setDisable(false);
+        this.client.stop();
+        this.client = null;
+        this.uiElements.clear();
+        this.paneDessin.getChildren().clear();
+        uiMaj();
     }
 
     public void removeElement(Forme forme) {
         this.uiElements.removeIf(f -> f.equals(forme));
         this.uiMaj();
+    }
+
+    public void fermer() {
+        if (this.client != null) {
+            this.client.stop();
+        }
+        if (this.serveur != null) {
+            this.serveur.stop();
+        }
+        Stage stage = (Stage) this.paneDessin.getScene().getWindow();
+        stage.close();
     }
 }
