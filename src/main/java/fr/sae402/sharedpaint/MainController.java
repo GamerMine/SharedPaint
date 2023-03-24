@@ -87,7 +87,9 @@ public class MainController {
     }
 
     private void undo(ActionEvent e) {
+
         Forme suppForme = this.client.undoClientForme();
+        if (suppForme == null) return;
         System.out.println(this.uiElements.size());
         this.uiElements.removeIf(forme -> forme.equals(suppForme));
         System.out.println(this.uiElements.size());

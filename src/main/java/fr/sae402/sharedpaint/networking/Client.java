@@ -111,6 +111,7 @@ public class Client implements Runnable {
     }
 
     public Forme undoClientForme() {
+        if (this.formesClient.size() == 0) return null;
         Forme undoForme = this.formesClient.removeLast();
         byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REMOVE_SHAPE, undoForme));
         DatagramPacket datagramPacket;
