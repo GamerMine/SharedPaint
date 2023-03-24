@@ -58,6 +58,9 @@ public class MainController {
         ImageToggleButton fillBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/fill.png"), null);
         ImageToggleButton undoBtn = new ImageToggleButton(SharedPaint.class.getResourceAsStream("icons/undo.png"), null);
 
+        fillBtn.setId("Fill");
+        fillBtn.setOnAction(this::btnFill);
+
         shapeTools.getChildren().add(fillBtn);
         shapeTools.getChildren().add(undoBtn);
 
@@ -78,6 +81,18 @@ public class MainController {
         colPick.setPadding(new Insets(2, 2, 2, 2));
 
         shapeTools.getChildren().add(colPick);
+
+    }
+
+    private void btnFill(ActionEvent e) {
+        ImageToggleButton btnFill = (ImageToggleButton) e.getSource();
+        if(btnFill.isSelected()) {
+            ImageView img = new ImageView(new Image(SharedPaint.class.getResourceAsStream("icons/circle.png")));
+            btnFill.setGraphic(img);
+        }else{
+            ImageView img = new ImageView(new Image(SharedPaint.class.getResourceAsStream("icons/fill.png")));
+            btnFill.setGraphic(img);
+        }
     }
 
     private void toolButtonClick(ActionEvent e) {
