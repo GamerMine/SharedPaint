@@ -90,9 +90,16 @@ public class MainController {
         colPick.setPrefHeight(32);
         colPick.setPrefWidth(100);
         colPick.setPadding(new Insets(2, 2, 2, 2));
+        colPick.setOnAction(this::colorPicker);
 
         shapeTools.getChildren().add(colPick);
 
+    }
+
+    private void colorPicker(ActionEvent e) {
+        ColorPicker colPick = (ColorPicker) e.getSource();
+        Color c = colPick.getValue();
+        this.metier.changerCouleur(c);
     }
 
     private void btnFill(ActionEvent e) {
@@ -103,6 +110,7 @@ public class MainController {
         }else{
             ImageView img = new ImageView(new Image(SharedPaint.class.getResourceAsStream("icons/fill.png")));
             btnFill.setGraphic(img);
+
         }
     }
 
@@ -136,7 +144,7 @@ public class MainController {
                 int finY = Math.abs(posY - (int)e.getY());
 
                 if (this.elementFantome == null) {
-                    this.elementFantome = new RectangleUI(new Rectangle(minX, minY, this.metier.getCouleurActuel().toString(), this.metier.isRempli(), finX, finY));
+                    this.elementFantome = new RectangleUI(new Rectangle(minX, minY, this.metier.getCouleurActuel().toString(),this.metier.isRempli(), finX, finY));
                 } else {
                     ((RectangleUI)this.elementFantome).setX(minX);
                     ((RectangleUI)this.elementFantome).setY(minY);
