@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ public class Serveur implements Runnable {
 
     private DatagramSocket ds;
     private HashMap<UUID, SocketAddress> clients;
+    private ArrayList<Forme> listFormes;
     private boolean stop;
 
     public Serveur() {
@@ -28,6 +30,7 @@ public class Serveur implements Runnable {
             throw new RuntimeException(e);
         }
         this.clients = new HashMap<>();
+        this.listFormes = new ArrayList<>();
         this.stop = false;
     }
 
@@ -49,20 +52,46 @@ public class Serveur implements Runnable {
                 }
                 case SEND_SHAPE -> {
                     Forme forme = (Forme) objectPacket.getObject();
+                    this.listFormes.add(forme);
                     System.out.println("Received a shape : " + forme.getClass().getTypeName());
-                    this.sendToAll(Commande.UPDATE_SHAPE, forme);
+                    this.sendToAll(Commande.SEND_SHAPE, forme);
                 }
+                case REQUEST_SHAPES -> {
+                    UUID clientUUID = (UUID) objectPacket.getObject();
+                    this.sendTo(clientUUID, objectPacket.getCommande(), null);
+                }
+                case REMOVE_SHAPE -> {
+                    Forme forme = (Forme) objectPacket.getObject();
+                    this.listFormes.removeIf(f -> f.equals(forme));
+                    this.sendToAll(Commande.REMOVE_SHAPE, forme);
+                }
+            }
+        }
+    }
+
+    private void sendTo(UUID clientUUID, Commande commande, Object obj) {
+        switch (commande) {
+            case REQUEST_SHAPES -> {
+                 for (Forme forme : this.listFormes) {
+                     byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.SEND_SHAPE, forme));
+                     DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
+                             this.clients.get(clientUUID));
+                     try {
+                         this.ds.send(datagramPacket);
+                     } catch (IOException e) {
+                         throw new RuntimeException(e);
+                     }
+                 }
             }
         }
     }
 
     private void sendToAll(Commande commande, Forme forme) {
         for (UUID uuid : this.clients.keySet()) {
-            byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.UPDATE_SHAPE, forme));
+            byte[] data = NetworkUtil.conversionByte(new ObjectPacket(commande, forme));
             DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
                     this.clients.get(uuid));
             try {
-                System.out.println("Sending " + forme.getClass().getTypeName() + " to " + uuid);
                 this.ds.send(datagramPacket);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -84,6 +113,7 @@ public class Serveur implements Runnable {
     }
 
     public void stop() {
+        this.sendToAll(Commande.STOP_CONNECTION, null);
         ds.close();
         this.stop = true;
     }

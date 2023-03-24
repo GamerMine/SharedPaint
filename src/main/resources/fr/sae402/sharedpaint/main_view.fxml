@@ -40,7 +40,7 @@
       </GridPane>
    </left>
    <center>
-      <AnchorPane fx:id="paneDessin" onMousePressed="#dessiner" onMouseReleased="#dessiner" BorderPane.alignment="CENTER" />
+      <AnchorPane fx:id="paneDessin" onMouseDragged="#dessiner" onMousePressed="#dessiner" onMouseReleased="#dessiner" BorderPane.alignment="CENTER" />
    </center>
    <top>
       <MenuBar BorderPane.alignment="CENTER">
@@ -48,10 +48,10 @@
           <Menu mnemonicParsing="false" text="Hébergement">
             <items>
               <MenuItem fx:id="menuHerbergement" mnemonicParsing="false" onAction="#hebergement" text="Partager" />
-                  <MenuItem mnemonicParsing="false" onAction="#rejoindre" text="Rejoindre" />
+                  <MenuItem fx:id="menuRejoindre" mnemonicParsing="false" onAction="#rejoindre" text="Rejoindre" />
                   <MenuItem mnemonicParsing="false" text="Information" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Fermer" />
+                  <MenuItem mnemonicParsing="false" onAction="#fermer" text="Fermer" />
             </items>
           </Menu>
         </menus>

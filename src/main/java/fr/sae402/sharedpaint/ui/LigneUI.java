@@ -2,18 +2,11 @@ package fr.sae402.sharedpaint.ui;
 
 import fr.sae402.sharedpaint.metier.Ligne;
 import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
 public class LigneUI extends Line {
     private Ligne ligne;
-
-    public LigneUI(int posX, int posY, String couleur, boolean rempli, int posXFin, int posYFin) {
-        this.ligne = new Ligne( posX,  posY,  couleur,  rempli,  posXFin,  posYFin);
-        this.setStartX(posX);
-        this.setStartY(posY);
-        this.setEndX(posXFin);
-        this.setEndY(posYFin);
-    }
 
     public LigneUI(Ligne ligne) {
         this.ligne = ligne;
@@ -21,6 +14,7 @@ public class LigneUI extends Line {
         this.setStartY(ligne.getPosY());
         this.setEndX(ligne.getPosXFin());
         this.setEndY(ligne.getPosYFin());
+        this.setFill(Color.web(ligne.getCouleur()));
     }
 
     public int getDebPosX() {
