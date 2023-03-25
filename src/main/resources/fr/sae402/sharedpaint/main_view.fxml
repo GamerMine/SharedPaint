@@ -61,7 +61,7 @@
             <items>
               <MenuItem fx:id="menuHerbergement" mnemonicParsing="false" onAction="#hebergement" text="Partager" />
                   <MenuItem fx:id="menuRejoindre" mnemonicParsing="false" onAction="#rejoindre" text="Rejoindre" />
-                  <MenuItem mnemonicParsing="false" text="Information" />
+                  <MenuItem mnemonicParsing="false" onAction="#information" text="Information" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem mnemonicParsing="false" onAction="#fermer" text="Fermer" />
             </items>

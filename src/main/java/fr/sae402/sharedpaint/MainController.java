@@ -1,22 +1,15 @@
 package fr.sae402.sharedpaint;
 
-import fr.sae402.sharedpaint.metier.Cercle;
-import fr.sae402.sharedpaint.metier.Metier;
-import fr.sae402.sharedpaint.metier.OutilForme;
-import fr.sae402.sharedpaint.metier.Rectangle;
+import fr.sae402.sharedpaint.metier.*;
 import fr.sae402.sharedpaint.networking.Client;
 import fr.sae402.sharedpaint.networking.Serveur;
-import fr.sae402.sharedpaint.metier.*;
 import fr.sae402.sharedpaint.ui.*;
-import javafx.beans.Observable;
-import javafx.collections.ObservableList;
+import fr.sae402.sharedpaint.ui.window.InformationWindow;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -27,6 +20,9 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -110,16 +106,14 @@ public class MainController {
 
     private void btnFill(ActionEvent e) {
         ImageToggleButton btnFill = (ImageToggleButton) e.getSource();
-        Boolean rempli = true;
         if(btnFill.isSelected()) {
             ImageView img = new ImageView(new Image(SharedPaint.class.getResourceAsStream("icons/circle.png")));
             btnFill.setGraphic(img);
-            this.metier.setRempli(rempli);
+            this.metier.setRempli(true);
         }else{
-            rempli = false;
             ImageView img = new ImageView(new Image(SharedPaint.class.getResourceAsStream("icons/fill.png")));
             btnFill.setGraphic(img);
-            this.metier.setRempli(rempli);
+            this.metier.setRempli(false);
         }
     }
 
@@ -414,6 +408,28 @@ public class MainController {
         uiMaj();
     }
 
+    public void information() throws IOException {
+        if (this.client == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Vous devez créer ou rejoindre une zone dessin !");
+            alert.showAndWait();
+            return;
+        }
+
+        String adresse = "";
+        if (this.serveur != null) {
+            try(final DatagramSocket socket = new DatagramSocket()){
+                socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+                adresse = socket.getLocalAddress().getHostAddress();
+            }
+        } else {
+            adresse = this.client.getAdresseServeur();
+        }
+        InformationWindow informationWindow = new InformationWindow(adresse, this);
+        informationWindow.show();
+    }
+
     public void removeElement(Forme forme) {
         this.uiElements.removeIf(f -> f.equals(forme));
         this.uiMaj();
@@ -428,5 +444,9 @@ public class MainController {
         }
         Stage stage = (Stage) this.paneDessin.getScene().getWindow();
         stage.close();
+    }
+
+    public void requestUtilisateurs() {
+        this.client.requestUtilisateurs();
     }
 }

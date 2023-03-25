@@ -2,9 +2,12 @@ package fr.sae402.sharedpaint.networking;
 
 import fr.sae402.sharedpaint.MainController;
 import fr.sae402.sharedpaint.metier.Forme;
+import fr.sae402.sharedpaint.metier.Utilisateur;
 import fr.sae402.sharedpaint.networking.packets.Commande;
 import fr.sae402.sharedpaint.networking.packets.ObjectPacket;
 import fr.sae402.sharedpaint.networking.packets.Packet;
+import fr.sae402.sharedpaint.ui.window.InformationWindow;
+import fr.sae402.sharedpaint.ui.window.InformationWindowController;
 import javafx.application.Platform;
 import javafx.scene.Node;
 
@@ -15,12 +18,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 public class Client implements Runnable {
-    private UUID idClient;
-    private String pseudo;
+    private Utilisateur utilisateur;
     private String adresseServeur;
     private boolean stop;
     private DatagramSocket ds;
@@ -31,9 +35,8 @@ public class Client implements Runnable {
     private static final byte[] buffer = new byte[TAILLE_BUFFER];
 
     public Client(String pseudo, String adresseServeur, MainController ctrl) {
-        this.idClient = UUID.randomUUID();
+        this.utilisateur = new Utilisateur(pseudo, UUID.randomUUID());
         this.ctrl = ctrl;
-        this.pseudo = pseudo;
         this.adresseServeur = adresseServeur;
         this.formesClient = new LinkedList<>();
 
@@ -45,18 +48,14 @@ public class Client implements Runnable {
         this.stop = false;
     }
 
-    public String getPseudo() {
-        return pseudo;
-    }
-
     @Override
     public void run() {
         DatagramPacket datagramPacket;
         try {
-            byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.USER_CONNECT, this.idClient));
+            byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.USER_CONNECT, this.utilisateur));
             datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(this.adresseServeur), Serveur.PORT);
             ds.send(datagramPacket);
-            data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REQUEST_SHAPES, this.idClient));
+            data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REQUEST_SHAPES, this.utilisateur));
             datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(this.adresseServeur), Serveur.PORT);
             ds.send(datagramPacket);
         } catch (IOException e) {
@@ -103,6 +102,10 @@ public class Client implements Runnable {
                 case STOP_CONNECTION -> {
                     Platform.runLater(() -> this.ctrl.deconnexion());
                 }
+                case REQUEST_USERS -> {
+                    List<Utilisateur> utilisateurs = (List<Utilisateur>) objectPacket.getObject();
+                    InformationWindowController.setUsers(utilisateurs);
+                }
             }
         }
     }
@@ -122,5 +125,18 @@ public class Client implements Runnable {
             this.ds.send(datagramPacket);
         } catch (Exception ignored) {}
         return undoForme;
+    }
+
+    public String getAdresseServeur() {
+        return adresseServeur;
+    }
+
+    public void requestUtilisateurs() {
+        byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REQUEST_USERS, utilisateur));
+        DatagramPacket datagramPacket;
+        try {
+            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(this.adresseServeur), Serveur.PORT);
+            this.ds.send(datagramPacket);
+        } catch (Exception ignored) {}
     }
 }

@@ -1,6 +1,7 @@
 package fr.sae402.sharedpaint.networking;
 
 import fr.sae402.sharedpaint.metier.Forme;
+import fr.sae402.sharedpaint.metier.Utilisateur;
 import fr.sae402.sharedpaint.networking.packets.Commande;
 import fr.sae402.sharedpaint.networking.packets.ObjectPacket;
 import fr.sae402.sharedpaint.networking.packets.Packet;
@@ -8,10 +9,12 @@ import fr.sae402.sharedpaint.networking.packets.Packet;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.UUID;
 
 public class Serveur implements Runnable {
     public static final int PORT = 7385;
@@ -19,7 +22,7 @@ public class Serveur implements Runnable {
     private static final byte[] buffer = new byte[TAILLE_BUFFER];
 
     private DatagramSocket ds;
-    private HashMap<UUID, SocketAddress> clients;
+    private HashMap<Utilisateur, SocketAddress> clients;
     private ArrayList<Forme> listFormes;
     private boolean stop;
 
@@ -42,12 +45,12 @@ public class Serveur implements Runnable {
         if (packet instanceof ObjectPacket objectPacket) {
             switch (packet.getCommande()) {
                 case USER_CONNECT -> {
-                    UUID clientUUID = (UUID) objectPacket.getObject();
-                    this.clients.put(clientUUID, data.getSocketAddress());
+                    Utilisateur user = (Utilisateur) objectPacket.getObject();
+                    this.clients.put(user, data.getSocketAddress());
                 }
                 case STOP_CONNECTION -> {
-                    UUID clientUUID = (UUID) objectPacket.getObject();
-                    this.clients.remove(clientUUID);
+                    Utilisateur user = (Utilisateur) objectPacket.getObject();
+                    this.clients.remove(user);
                 }
                 case SEND_SHAPE -> {
                     Forme forme = (Forme) objectPacket.getObject();
@@ -55,25 +58,33 @@ public class Serveur implements Runnable {
                     this.sendToAll(Commande.SEND_SHAPE, forme);
                 }
                 case REQUEST_SHAPES -> {
-                    UUID clientUUID = (UUID) objectPacket.getObject();
-                    this.sendTo(clientUUID, objectPacket.getCommande(), null);
+                    Utilisateur user = (Utilisateur) objectPacket.getObject();
+                    this.sendTo(user, objectPacket.getCommande(), null);
                 }
                 case REMOVE_SHAPE -> {
                     Forme forme = (Forme) objectPacket.getObject();
                     this.listFormes.removeIf(f -> f.equals(forme));
                     this.sendToAll(Commande.REMOVE_SHAPE, forme);
                 }
+                case REQUEST_USERS -> {
+                    Utilisateur utilisateur = (Utilisateur) objectPacket.getObject();
+                    for (Utilisateur user : clients.keySet()) {
+                        if (utilisateur.equals(user)) {
+                            this.sendTo(user, Commande.REQUEST_USERS, this.clients.keySet().stream().toList());
+                        }
+                    }
+                }
             }
         }
     }
 
-    private void sendTo(UUID clientUUID, Commande commande, Object obj) {
+    private void sendTo(Utilisateur user, Commande commande, Object obj) {
         switch (commande) {
             case REQUEST_SHAPES -> {
                  for (Forme forme : this.listFormes) {
                      byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.SEND_SHAPE, forme));
                      DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
-                             this.clients.get(clientUUID));
+                             this.clients.get(user));
                      try {
                          this.ds.send(datagramPacket);
                      } catch (IOException e) {
@@ -81,14 +92,24 @@ public class Serveur implements Runnable {
                      }
                  }
             }
+            case REQUEST_USERS -> {
+                byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REQUEST_USERS, obj));
+                DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
+                        this.clients.get(user));
+                try {
+                    this.ds.send(datagramPacket);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
     private void sendToAll(Commande commande, Forme forme) {
-        for (UUID uuid : this.clients.keySet()) {
+        for (Utilisateur user : this.clients.keySet()) {
             byte[] data = NetworkUtil.conversionByte(new ObjectPacket(commande, forme));
             DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
-                    this.clients.get(uuid));
+                    this.clients.get(user));
             try {
                 this.ds.send(datagramPacket);
             } catch (IOException e) {
