@@ -234,7 +234,15 @@ public class MainController {
             }
 
             if(this.metier.getFormeActuel() == Texte.class) {
-                forme = new Texte(posX, posY, this.metier.getCouleurActuel().toString(), "TEXTE A EDIT");
+                TextInputDialog texte = new TextInputDialog();
+                texte.setTitle("Nouveau Texte");
+                texte.setHeaderText("Tapez le texte à afficher :");
+
+                Optional<String> resultat = texte.showAndWait();
+
+                if(resultat.isEmpty()) return;
+                String texteResultat = resultat.get();
+                forme = new Texte(posX, posY, this.metier.getCouleurActuel().toString(), texteResultat);
             }
 
             if(this.metier.getFormeActuel() == Ellipse.class) {
