@@ -1,6 +1,6 @@
-package fr.sae402.sharedpaint.ui;
+package fr.sae402.sharedpaint.ui.shape;
 
-import fr.sae402.sharedpaint.metier.Ellipse;
+import fr.sae402.sharedpaint.metier.shape.Ellipse;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 

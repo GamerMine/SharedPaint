@@ -1,8 +1,8 @@
 package fr.sae402.sharedpaint.metier;
 
 import fr.sae402.sharedpaint.SharedPaint;
+import fr.sae402.sharedpaint.metier.shape.*;
 import fr.sae402.sharedpaint.ui.ImageToggleButton;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 
 import java.io.InputStream;

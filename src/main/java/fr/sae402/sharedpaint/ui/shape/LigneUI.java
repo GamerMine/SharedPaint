@@ -1,6 +1,6 @@
-package fr.sae402.sharedpaint.ui;
+package fr.sae402.sharedpaint.ui.shape;
 
-import fr.sae402.sharedpaint.metier.Ligne;
+import fr.sae402.sharedpaint.metier.shape.Ligne;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;

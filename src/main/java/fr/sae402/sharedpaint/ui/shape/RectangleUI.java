@@ -1,13 +1,13 @@
-package fr.sae402.sharedpaint.ui;
+package fr.sae402.sharedpaint.ui.shape;
 
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class RectangleUI extends Rectangle {
-    private fr.sae402.sharedpaint.metier.Rectangle rectangle;
+    private fr.sae402.sharedpaint.metier.shape.Rectangle rectangle;
 
-    public RectangleUI(fr.sae402.sharedpaint.metier.Rectangle rectangle) {
+    public RectangleUI(fr.sae402.sharedpaint.metier.shape.Rectangle rectangle) {
         this.rectangle = rectangle;
         this.setX(rectangle.getPosX());
         this.setY(rectangle.getPosY());
@@ -31,7 +31,7 @@ public class RectangleUI extends Rectangle {
     }
 
 
-    public fr.sae402.sharedpaint.metier.Rectangle getElementRectangle() {
+    public fr.sae402.sharedpaint.metier.shape.Rectangle getElementRectangle() {
         return this.rectangle;
     }
 }

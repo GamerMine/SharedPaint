@@ -1,4 +1,4 @@
-package fr.sae402.sharedpaint.metier;
+package fr.sae402.sharedpaint.metier.shape;
 
 import java.io.Serializable;
 

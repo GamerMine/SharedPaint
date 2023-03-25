@@ -1,4 +1,4 @@
-package fr.sae402.sharedpaint.metier;
+package fr.sae402.sharedpaint.metier.shape;
 
 public class Cercle extends Forme {
     private int rayon;

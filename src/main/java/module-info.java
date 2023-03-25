@@ -12,4 +12,5 @@ module fr.sae402.sharedpaint {
     exports fr.sae402.sharedpaint.ui.window to javafx.fxml;
     exports fr.sae402.sharedpaint;
     opens fr.sae402.sharedpaint.metier to com.google.gson;
+    opens fr.sae402.sharedpaint.metier.shape to com.google.gson;
 }

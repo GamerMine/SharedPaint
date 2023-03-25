@@ -1,9 +1,11 @@
 package fr.sae402.sharedpaint;
 
 import fr.sae402.sharedpaint.metier.*;
+import fr.sae402.sharedpaint.metier.shape.*;
 import fr.sae402.sharedpaint.networking.Client;
 import fr.sae402.sharedpaint.networking.Serveur;
 import fr.sae402.sharedpaint.ui.*;
+import fr.sae402.sharedpaint.ui.shape.*;
 import fr.sae402.sharedpaint.ui.window.InformationWindow;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

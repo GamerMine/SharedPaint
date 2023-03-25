@@ -1,15 +1,13 @@
 package fr.sae402.sharedpaint.networking;
 
 import fr.sae402.sharedpaint.MainController;
-import fr.sae402.sharedpaint.metier.Forme;
+import fr.sae402.sharedpaint.metier.shape.Forme;
 import fr.sae402.sharedpaint.metier.Utilisateur;
 import fr.sae402.sharedpaint.networking.packets.Commande;
 import fr.sae402.sharedpaint.networking.packets.ObjectPacket;
 import fr.sae402.sharedpaint.networking.packets.Packet;
-import fr.sae402.sharedpaint.ui.window.InformationWindow;
 import fr.sae402.sharedpaint.ui.window.InformationWindowController;
 import javafx.application.Platform;
-import javafx.scene.Node;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -18,7 +16,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;

@@ -1,9 +1,7 @@
 package fr.sae402.sharedpaint.metier;
 
 import fr.sae402.sharedpaint.MainController;
-import fr.sae402.sharedpaint.ui.RectangleUI;
-import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
+import fr.sae402.sharedpaint.metier.shape.Forme;
 import javafx.scene.paint.Color;
 
 public class Metier {

@@ -1,6 +1,6 @@
 package fr.sae402.sharedpaint.networking;
 
-import fr.sae402.sharedpaint.metier.Forme;
+import fr.sae402.sharedpaint.metier.shape.Forme;
 import fr.sae402.sharedpaint.metier.Utilisateur;
 import fr.sae402.sharedpaint.networking.packets.Commande;
 import fr.sae402.sharedpaint.networking.packets.ObjectPacket;
