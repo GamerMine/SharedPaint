@@ -46,11 +46,16 @@ public class Serveur implements Runnable {
             switch (packet.getCommande()) {
                 case USER_CONNECT -> {
                     Utilisateur user = (Utilisateur) objectPacket.getObject();
+                    System.out.println(user.getPseudo() + " connected!");
                     this.clients.put(user, data.getSocketAddress());
                 }
                 case STOP_CONNECTION -> {
                     Utilisateur user = (Utilisateur) objectPacket.getObject();
-                    this.clients.remove(user);
+                    for (Utilisateur utilisateur : this.clients.keySet()) {
+                        if (utilisateur.equals(user)) {
+                            this.clients.remove(utilisateur);
+                        }
+                    }
                 }
                 case SEND_SHAPE -> {
                     Forme forme = (Forme) objectPacket.getObject();
@@ -59,7 +64,11 @@ public class Serveur implements Runnable {
                 }
                 case REQUEST_SHAPES -> {
                     Utilisateur user = (Utilisateur) objectPacket.getObject();
-                    this.sendTo(user, objectPacket.getCommande(), null);
+                    for (Utilisateur utilisateur : this.clients.keySet()) {
+                        if (utilisateur.equals(user)) {
+                            this.sendTo(utilisateur, objectPacket.getCommande(), null);
+                        }
+                    }
                 }
                 case REMOVE_SHAPE -> {
                     Forme forme = (Forme) objectPacket.getObject();
@@ -73,35 +82,40 @@ public class Serveur implements Runnable {
                             this.sendTo(user, Commande.REQUEST_USERS, this.clients.keySet().stream().toList());
                         }
                     }
+                    System.out.println(this.clients.keySet().stream());
                 }
             }
         }
     }
 
     private void sendTo(Utilisateur user, Commande commande, Object obj) {
-        switch (commande) {
-            case REQUEST_SHAPES -> {
-                 for (Forme forme : this.listFormes) {
-                     byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.SEND_SHAPE, forme));
-                     DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
-                             this.clients.get(user));
-                     try {
-                         this.ds.send(datagramPacket);
-                     } catch (IOException e) {
-                         throw new RuntimeException(e);
-                     }
-                 }
-            }
-            case REQUEST_USERS -> {
-                byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REQUEST_USERS, obj));
-                DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
-                        this.clients.get(user));
-                try {
-                    this.ds.send(datagramPacket);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+        try {
+            switch (commande) {
+                case REQUEST_SHAPES -> {
+                    for (Forme forme : this.listFormes) {
+                        byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.SEND_SHAPE, forme));
+                        DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
+                                this.clients.get(user));
+                        try {
+                            this.ds.send(datagramPacket);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+                case REQUEST_USERS -> {
+                    byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.REQUEST_USERS, obj));
+                    DatagramPacket datagramPacket = new DatagramPacket(data, data.length,
+                            this.clients.get(user));
+                    try {
+                        this.ds.send(datagramPacket);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

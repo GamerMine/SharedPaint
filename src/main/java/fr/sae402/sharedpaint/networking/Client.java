@@ -108,6 +108,12 @@ public class Client implements Runnable {
     }
 
     public void stop() {
+        byte[] data = NetworkUtil.conversionByte(new ObjectPacket(Commande.STOP_CONNECTION, utilisateur));
+        DatagramPacket datagramPacket;
+        try {
+            datagramPacket = new DatagramPacket(data, data.length, InetAddress.getByName(this.adresseServeur), Serveur.PORT);
+            this.ds.send(datagramPacket);
+        } catch (Exception ignored) {}
         ds.close();
         this.stop = true;
     }
