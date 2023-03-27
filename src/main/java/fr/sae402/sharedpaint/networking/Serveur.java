@@ -15,6 +15,8 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class Serveur implements Runnable {
     public static final int PORT = 7385;
@@ -51,9 +53,11 @@ public class Serveur implements Runnable {
                 }
                 case STOP_CONNECTION -> {
                     Utilisateur user = (Utilisateur) objectPacket.getObject();
-                    for (Utilisateur utilisateur : this.clients.keySet()) {
-                        if (utilisateur.equals(user)) {
-                            this.clients.remove(utilisateur);
+                    Iterator it = this.clients.entrySet().iterator();
+                    while (it.hasNext()) {
+                        Map.Entry<Utilisateur, SocketAddress> item = (Map.Entry<Utilisateur, SocketAddress>) it.next();
+                        if (item.getKey().equals(user)) {
+                            it.remove();
                         }
                     }
                 }
