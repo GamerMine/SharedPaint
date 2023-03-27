@@ -48,7 +48,6 @@ public class Serveur implements Runnable {
             switch (packet.getCommande()) {
                 case USER_CONNECT -> {
                     Utilisateur user = (Utilisateur) objectPacket.getObject();
-                    System.out.println(user.getPseudo() + " connected!");
                     this.clients.put(user, data.getSocketAddress());
                 }
                 case STOP_CONNECTION -> {
@@ -86,7 +85,6 @@ public class Serveur implements Runnable {
                             this.sendTo(user, Commande.REQUEST_USERS, this.clients.keySet().stream().toList());
                         }
                     }
-                    System.out.println(this.clients.keySet().stream());
                 }
             }
         }
