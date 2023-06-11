@@ -13,7 +13,9 @@ public class EllipseUI extends javafx.scene.shape.Ellipse {
         this.setCenterY(ellipse.getPosY());
         this.setRadiusX(ellipse.getRayonX());
         this.setRadiusY(ellipse.getRayonY());
-        if(ellipse.getRempli() == false){
+
+        // Simplification
+        if(!ellipse.getRempli()){
             this.setFill(Color.TRANSPARENT);
             this.setStroke(Color.web(ellipse.getCouleur()));
         }else{
